@@ -36,5 +36,5 @@ runCommandWith hIn hOut cmd = do
         Request 0 (Text.pack "vim_call_function") $ Vector.fromList $
           [ toObject m
           , toObject $ Vector.fromList xs ]
-      unpack (Response _ a) = [a]
-      unpack _              = []
+      unpack (Right (Response _ a)) = [a]
+      unpack _                      = []
