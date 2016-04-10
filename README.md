@@ -1,5 +1,9 @@
 Sarsi
 =====
+
+[![View on hackage](https://img.shields.io/hackage/v/sarsi.svg)](http://hackage.haskell.org/package/sarsi)
+[![Join the chat at https://gitter.im/aloiscochard/sarsi](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/aloiscochard/sarsi)
+
 A universal quickfix toolkit and his protocol.
 
 # Philosophy
@@ -12,12 +16,12 @@ That's basically what `sarsi` is doing, and will always do, any other integratio
 
 # Modules
 
-Producers
+#### Producers
 
  - `sarsi-hs` - A generic command line wrapper for Haskell tools (GHC/Cabal/[Stack](http://haskellstack.org/)/...)
  - `sarsi-sbt` - A [SBT](http://www.scala-sbt.org/) specific wrapper for the Scala programming language
 
-Consumers
+#### Consumers
 
  - `sarsi-nvim` - A lightweight [Neovim](https://neovim.io/) RPC client
 
@@ -59,12 +63,16 @@ The `sarsi-hs` command line wrapper allow you to run an arbitrary command and ge
 
 	sarsi-hs stack build
 
-It works nicely with `inotifywait`, or any other hooks you would like to use.
+It works nicely with [entr](http://entrproject.org/), `inotifywait`, or any other hook mechanism you would like to use.
+
+```
+while sleep 1; do find ./**/*.hs *.cabal stack.yaml | entr -cdr sarsi-hs stack build; done;
+```
 
 ### Scala
 
 You can simply use it in place of your `sbt` command, interactively or not (you should surely prefer the former for performance reasons).
 
-	sarsi-sbt ~test:compile
+	sarsi-sbt
 
 It will behind the scene call the `sbt` program available in the path.
