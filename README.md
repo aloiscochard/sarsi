@@ -66,7 +66,9 @@ The `sarsi-hs` command line wrapper allow you to run an arbitrary command and ge
 It works nicely with [entr](http://entrproject.org/), `inotifywait`, or any other hook mechanism you would like to use.
 
 ```
-while sleep 1; do find ./**/*.hs *.cabal stack.yaml | entr -cdr sarsi-hs stack build; done;
+while sleep 1; do 
+  find ./**/*.hs *.cabal stack.yaml ! -path "./.stack-work/*" | entr -cdr sarsi-hs stack build; 
+done;
 ```
 
 ### Scala
