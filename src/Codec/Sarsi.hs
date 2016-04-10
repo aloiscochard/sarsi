@@ -7,6 +7,7 @@ import Data.Vector (Vector)
 import qualified Data.MessagePack.Get as Get
 import qualified Data.MessagePack.Put as Put
 import qualified Data.Text as Text
+import qualified Data.Vector as Vector
 
 data Event
   = Start { label :: Text }
@@ -38,7 +39,8 @@ putEvent (Notify m) = Put.putInt 2 *> putMessage m
 data Message = Message Location Level (Vector Text)
 
 instance Show Message where
-  show (Message loc lvl texts) = concat [show loc, " ", show lvl]
+  show (Message loc lvl txts) =
+    (concat [show loc, " ", show lvl, "\n"]) ++ (unlines $ Text.unpack <$> Vector.toList txts)
 
 getMessage :: Get Message
 getMessage = Message <$> getLocation <*> getLevel <*> Get.getArray Get.getStr

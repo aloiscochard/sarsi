@@ -22,6 +22,7 @@ echom str = VimCommand [toObject $ concat ["echom \"", title, ": ", str, "\""]]
 setqflist :: String -> [Object] -> Command
 setqflist action items = VimCallFunction (Text.pack "setqflist") [toObject items, toObject action]
 
+-- TODO Sanitize text description by escaping special characters
 mkQuickFix :: Message -> Object
 mkQuickFix (Message (Location fp col ln) lvl txts) = toObject . Map.fromList $
   [ ("filename", toObject fp)
@@ -39,7 +40,8 @@ main = do
   hSetBuffering stdout NoBuffering
   consume "." $ sinkIO publish <~ asParts <~ auto f
     where
-      f (Notify msg)  = [setqflist "a" [mkQuickFix msg], echo $ show msg]
+      f (Notify msg@(Message loc lvl _))  =
+        [setqflist "a" [mkQuickFix msg], echo $ concat [show loc, " ", show lvl]]
       f e@(Start _)   = [setqflist "r" [], echom $ show e]
       f e             = [echom $ show e ]
       publish cmd = do
