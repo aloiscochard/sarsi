@@ -47,8 +47,8 @@ producer cmd sink = do
       createFinish xs = foldl' f empty xs
         where
           empty = Finish 0 0
-          f (Finish w e) (Notify (Message _ Warning _)) = Finish (w + 1) e
-          f (Finish w e) (Notify (Message _ Error _))   = Finish w (e + 1)
+          f (Finish e w) (Notify (Message _ Warning _)) = Finish e (w + 1)
+          f (Finish e w) (Notify (Message _ Error _))   = Finish (e + 1) w
           f finish _ = finish
 
 main :: IO ()
