@@ -14,7 +14,7 @@ import System.IO (stdin, stdout, stderr)
 import System.IO.Machine (byLine, printer)
 import System.Process (CreateProcess, StdStream(..), shell, std_in, std_out, std_err)
 import System.Process.Machine (callProcessMachines, mStdErr)
-import System.Exit (ExitCode)
+import System.Exit (ExitCode, exitWith)
 
 import qualified Data.List as List
 import qualified Data.Text as Text
@@ -35,13 +35,13 @@ callShell cmd sink = callProcessMachines byLine createProc (mStdErr pipeline)
     createProc  = (shell cmd) { std_in = Inherit, std_err = CreatePipe }
     appendCR = auto $ (`Text.snoc` '\n')
 
-producer :: String -> ProcessT IO Event Event -> IO ()
+producer :: String -> ProcessT IO Event Event -> IO ExitCode
 producer cmd sink = do
   (ec, xs) <- callShell cmd pipeline
   let finish = createFinish xs
   putStrLn $ concat [title, ": ", show finish]
   runT_ $ sink <~ source [finish]
-  return ()
+  return ec
     where
       pipeline = sink <~ prepended [Start $ Text.pack "haskell"] <~ auto Notify
       createFinish xs = foldl' f empty xs
@@ -53,5 +53,6 @@ producer cmd sink = do
 
 main :: IO ()
 main = do
-  args      <- getArgs
-  produce "." $ producer (concat $ List.intersperse " " args)
+  args  <- getArgs
+  ec    <- produce "." $ producer (concat $ List.intersperse " " args)
+  exitWith ec
