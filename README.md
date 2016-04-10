@@ -23,11 +23,22 @@ Consumers
 
 # Install
 
-Sarsi is published on Hackage, and can be installed with `stack`/`cabal`.
+#### Hackage
 
-	stack install sarsi
+*Sarsi* is published on Hackage and can be installed using `cabal`.
+
+	cabal install sarsi
 
 This will install all the modules as well.
+
+#### Source
+
+Alternatively, it can be installed from source using `stack`.
+	
+	git clone git@github.com:aloiscochard/sarsi.git
+	cd sarsi
+	stack install
+
 
 ### Neovim Integration
 
