@@ -1,20 +1,14 @@
 flags: {}
 packages:
 - '.'
-- /home/alois/oss/machines
-- /home/alois/ego/machines-extra/machines-io
-- /home/alois/ego/machines-extra/machines-binary
-- /home/alois/ego/machines-extra/machines-process
 extra-deps:
 - adjunctions-4.2.2
-- aeson-0.11.1.4
 - base-orphans-0.5.3
-- conduit-combinators-0.3.1
-- conduit-extra-1.1.13.1
-- criterion-1.0.2.0
 - distributive-0.4.4
+- machines-0.6
+- machines-binary-0.3.0.2
+- machines-process-0.2.0.6
+- machines-io-0.2.0.12
 - msgpack-1.0.0
 - text-1.2.2.0
-- vector-binary-instances-0.2.3.1
-- vector-th-unbox-0.2.1.5
 resolver: lts-5.5
