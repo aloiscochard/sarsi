@@ -16,6 +16,7 @@ library
   exposed-modules:
     Codec.Sarsi
     Codec.Sarsi.GHC
+    Codec.Sarsi.SBT
     Sarsi
     Sarsi.Consumer
     Sarsi.Producer
