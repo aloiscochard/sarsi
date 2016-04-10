@@ -6,6 +6,8 @@ import Data.Attoparsec.Combinator (lookAhead)
 import Data.Attoparsec.Text
 import Data.Text (Text)
 
+import qualified Data.Attoparsec.Text as AttoText
+import qualified Data.Text as Text
 import qualified Data.Vector as Vector
 
 data SBTEvent = CompileStart Text | TaskFinish Bool Text | Throw Message
@@ -44,5 +46,22 @@ messageParser = do
       formatTxts t ts = Vector.fromList $ t : init ts
       column = lineStart *> ((length <$> many1 space) <* "^\n")
 
+cleanEC :: Parser Text
+cleanEC = choice [noEC, withEC]
+  where
+    noEC    = takeStart <* endOfInput
+    withEC  = do
+      before <- takeStart <* anyChar
+      _      <- takeEnd   <* anyChar
+      after  <- cleanEC
+      return (Text.concat [before, after])
+    takeStart = AttoText.takeWhile (not . isEscStart . fromEnum)
+    takeEnd   = AttoText.takeWhile (not . isEscEnd . fromEnum)
+    isEscStart 27 = True
+    isEscStart _  = False
+    isEscEnd 109 = True
+    isEscEnd _ = False
+
 untilLineBreak = takeWhile1 $ \w -> w /= '\n' && w /= '\r'
 end = choice [const () <$> "\n", endOfInput, return ()]
+
