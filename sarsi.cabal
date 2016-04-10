@@ -53,8 +53,11 @@ library
 
 executable sarsi 
   main-is:              Main.hs
+  other-modules:
+    Paths_sarsi
   build-depends:       
       base
+    , Cabal
     , sarsi
   hs-source-dirs:       sarsi
   ghc-options:          -Wall
@@ -63,7 +66,6 @@ executable sarsi
 
 executable sarsi-hs
   main-is:              Main.hs
-  other-modules:
   build-depends:       
       base
     , sarsi                 == 0.0.0.4
