@@ -17,9 +17,9 @@ data Event
 instance Show Event where
   show (Start label) = concat ["starting ", unpack label, " build"]
   show (Finish 0 0) = "build success"
-  show (Finish w 0) = concat ["build success with ", show w, " warning(s)"]
-  show (Finish 0 e) = concat ["build fail with ", show e, " error(s)"]
-  show (Finish w e) = concat ["build fail with ", show e, " error(s) and ", show w, " warning(s)"]
+  show (Finish 0 w) = concat ["build success with ", show w, " warning(s)"]
+  show (Finish e 0) = concat ["build fail with ", show e, " error(s)"]
+  show (Finish e w) = concat ["build fail with ", show e, " error(s) and ", show w, " warning(s)"]
   show (Notify msg) = concat ["message=", show msg]
 
 getEvent :: Get Event
