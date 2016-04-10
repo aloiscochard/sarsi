@@ -1,7 +1,7 @@
 module Main where
 
 import Codec.Sarsi (Event(..), Level(..), Location(..), Message(..), getEvent)
-import Data.Machine ((<~), asParts, auto)
+import Data.Machine ((<~), asParts, auto, scan)
 import Data.MessagePack.Object (Object(..), toObject)
 import NVIM.Client (Command(..), runCommand)
 import Sarsi (title)
@@ -34,16 +34,22 @@ mkQuickFix (Message (Location fp col ln) lvl txts) = toObject . Map.fromList $
       tpe Error   = "E"
       tpe Warning = "W"
 
+convert :: Bool -> Event -> (Bool, [Command])
+convert _ e@(Start _)     = (True, [echom $ show e])
+convert _ e@(Finish _ _)  = (True, [echom $ show e])
+convert first (Notify msg@(Message loc lvl _))  = (False, xs) where
+  xs =
+    [ setqflist (if first then "r" else "a") [mkQuickFix msg]
+    , echo $ concat [show loc, " ", show lvl] ]
+
 main :: IO ()
 main = do
   hSetBuffering stdin NoBuffering
   hSetBuffering stdout NoBuffering
-  consume "." $ sinkIO publish <~ asParts <~ auto f
+  consume "." $ sinkIO publish <~ asParts <~ auto unpack <~ scan f (True, [])
     where
-      f (Notify msg@(Message loc lvl _))  =
-        [setqflist "a" [mkQuickFix msg], echo $ concat [show loc, " ", show lvl]]
-      f e@(Start _)   = [setqflist "r" [], echom $ show e]
-      f e             = [echom $ show e ]
+      f (first, _) event = convert first event
+      unpack (_, xs) = xs
       publish cmd = do
         -- TODO Log failed command in a file (or print to stderr?).
         _ <- runCommand cmd
