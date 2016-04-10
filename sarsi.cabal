@@ -1,5 +1,5 @@
 name:                sarsi
-version:             0.0.0.4
+version:             0.0.1.0
 synopsis:            A universal quickfix toolkit and his protocol.
  
 description:
@@ -68,7 +68,7 @@ executable sarsi-hs
   main-is:              Main.hs
   build-depends:       
       base
-    , sarsi                 == 0.0.0.4
+    , sarsi                 == 0.0.1.0
     , machines
     , machines-io
     , machines-process
@@ -90,7 +90,7 @@ executable sarsi-nvim
     -- NVIM.Info
   build-depends:       
       base
-    , sarsi                 == 0.0.0.4
+    , sarsi                 == 0.0.1.0
     , machines
     , binary
     , bytestring
@@ -113,7 +113,7 @@ executable sarsi-sbt
   other-modules:
   build-depends:       
       base
-    , sarsi                 == 0.0.0.4
+    , sarsi                 == 0.0.1.0
     , machines
     , machines-io
     , machines-process
