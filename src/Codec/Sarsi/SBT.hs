@@ -36,7 +36,7 @@ messageParser = do
   ts  <- manyTill' (lineStart *> (untilLineBreak <* "\n")) (lookAhead $ column)
   col <- column
   _   <- end
-  return $ Message (Location fp (col + 1) ln) lvl $ formatTxts t ts
+  return $ Message (Location fp (col) ln) lvl $ formatTxts t ts
     where
       takeLineBreak = takeWhile1 $ \w -> w == '\n' || w == '\r'
       level = choice [string "[error]" *> return Error, string "[warn]" *> return Warning]
@@ -44,7 +44,7 @@ messageParser = do
       sepChar = ':'
       formatTxts t [] = Vector.singleton t
       formatTxts t ts = Vector.fromList $ t : init ts
-      column = lineStart *> ((length <$> many1 space) <* "^\n")
+      column = level *> ((length <$> many1 space) <* "^\n")
 
 cleanEC :: Parser Text
 cleanEC = choice [noEC, withEC]
