@@ -2,11 +2,10 @@ module NVIM.Client where
 
 -- | A primitive NVIM RPC synchronous client.
 
-import Data.Binary.Get (runGet)
 import Data.Binary.Machine (streamGet)
 import Data.Binary.Put (runPut)
 import Data.ByteString (hGetSome, hPut)
-import Data.ByteString.Lazy (fromStrict, toStrict)
+import Data.ByteString.Lazy (toStrict)
 import Data.Machine ((<~), asParts, auto, final, run, source)
 import Data.MessagePack.Object (Object(..), toObject)
 import Data.MessagePack.RPC (Answer(..), Request(..), Message(..), getMessage, putRequest)

@@ -15,7 +15,7 @@ data Event
   | Notify { message :: Message }
 
 instance Show Event where
-  show (Start label) = concat ["starting ", unpack label, " build"]
+  show (Start lbl) = concat ["starting ", unpack lbl, " build"]
   show (Finish 0 0) = "build success"
   show (Finish 0 w) = concat ["build success with ", show w, " warning(s)"]
   show (Finish e 0) = concat ["build fail with ", show e, " error(s)"]

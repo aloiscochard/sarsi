@@ -2,18 +2,16 @@ module Main where
 
 import Codec.Sarsi (Event)
 import Codec.Sarsi.SBT.Machine (eventProcess)
-import Data.Machine (ProcessT, (<~), asParts, auto, autoM, runT_)
+import Data.Machine (ProcessT, (<~), autoM)
 import Sarsi.Producer (produce)
 import System.Environment (getArgs)
 import System.Exit (ExitCode, exitWith)
-import System.Process (CreateProcess, StdStream(..), shell, std_in, std_out, std_err)
+import System.Process (StdStream(..), shell, std_in, std_out)
 import System.Process.Machine (callProcessMachines, mStdOut)
 import System.IO (BufferMode(NoBuffering), hSetBuffering, stdin, stdout)
-import System.IO.Machine (byChunk, printer)
+import System.IO.Machine (byChunk)
 
-import qualified Data.Char as Char
 import qualified Data.List as List
-import qualified Data.Text as Text
 import qualified Data.Text.IO as TextIO
 import qualified Sarsi as Sarsi
 

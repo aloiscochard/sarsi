@@ -3,7 +3,7 @@ module Codec.Sarsi.SBT.Machine where
 import Codec.Sarsi (Event(..), Message(..), Level(..))
 import Codec.Sarsi.SBT (SBTEvent(..), eventParser, cleanEC, untilLineBreak, end)
 import Data.Attoparsec.Text.Machine (processParser, streamParser)
-import Data.Machine (ProcessT, (<~), asParts, auto, autoM, scan, runT_)
+import Data.Machine (ProcessT, (<~), asParts, auto, scan)
 import Data.Text (Text)
 
 import qualified Data.Text as Text

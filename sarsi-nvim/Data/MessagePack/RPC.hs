@@ -36,12 +36,13 @@ getMessage = do
   tpe <- MP.getInt
   case tpe of
     1 -> do
-      id <- MP.getInt
+      id' <- MP.getInt
       err <- get
       res <- get
-      return $ Response id $ f err res where
+      return $ Response id' $ f err res where
         f ObjectNil res = Success res
         f err ObjectNil = Error err
+        f _ _           = Error ObjectNil
     2 -> do
       method <- MP.getStr
       (ObjectArray params) <- get

@@ -3,13 +3,11 @@ module Sarsi.Producer where
 
 import Codec.Sarsi (Event(..), putEvent)
 import Data.Binary.Machine (processPut)
-import Data.Machine (ProcessT, (<~), auto, asParts, runT_)
+import Data.Machine (ProcessT, (<~), auto, asParts)
 import Data.Machine.Fanout (fanout)
 import Network.Socket (connect, socketToHandle)
 import System.IO (IOMode(AppendMode), hClose)
 import System.IO.Machine (byChunk, sinkHandle)
-
-import qualified Data.Text as T
 
 import Sarsi (mkSocket, mkSockAddr)
 

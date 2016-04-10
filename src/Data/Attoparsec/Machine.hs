@@ -1,8 +1,8 @@
 {-# LANGUAGE Rank2Types #-}
 module Data.Attoparsec.Machine where
 
-import Data.Attoparsec.Internal.Types (IResult(..), Parser)
-import Data.Machine (MachineT(..), ProcessT, Step(Await, Yield), Is(Refl), source, stopped)
+import Data.Attoparsec.Internal.Types (IResult(..))
+import Data.Machine (MachineT(..), ProcessT, Step(Await, Yield), Is(Refl), stopped)
 
 streamParserWith :: (Monoid i, Monad m) => (i -> IResult i a) -> ProcessT m i (Either String a)
 streamParserWith runParser = start where

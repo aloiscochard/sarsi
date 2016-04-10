@@ -1,7 +1,7 @@
 module Codec.Sarsi.GHC where
 
 import Codec.Sarsi
-import Data.Text (Text, strip)
+import Data.Text (strip)
 
 import qualified Codec.GHC.Log as Log
 import qualified Data.Vector as Vector

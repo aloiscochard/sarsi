@@ -1,12 +1,12 @@
 module Main where
 
-import Codec.Sarsi (Event(..), Level(..), Location(..), Message(..), getEvent)
+import Codec.Sarsi (Event(..), Level(..), Location(..), Message(..))
 import Data.Machine ((<~), asParts, auto, scan)
 import Data.MessagePack.Object (Object(..), toObject)
 import NVIM.Client (Command(..), runCommand)
 import Sarsi (title)
 import Sarsi.Consumer (consume)
-import System.IO (BufferMode(NoBuffering), hSetBinaryMode, hSetBuffering, stdin, stdout)
+import System.IO (BufferMode(NoBuffering), hSetBuffering, stdin, stdout)
 import System.IO.Machine (sinkIO)
 
 import qualified Data.Text as Text

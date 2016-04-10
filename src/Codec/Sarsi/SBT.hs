@@ -33,18 +33,17 @@ messageParser = do
   fp  <- takeWhile1 (\c -> c /= sepChar && c /= '\n' && c /= '\r') <* char sepChar
   ln  <- decimal <* char sepChar
   t   <- space *> (untilLineBreak <* "\n")
-  ts  <- manyTill' (lineStart *> (untilLineBreak <* "\n")) (lookAhead $ column)
-  col <- column
+  ts  <- manyTill' (lineStart *> (untilLineBreak <* "\n")) (lookAhead $ column')
+  col <- column'
   _   <- end
   return $ Message (Location fp (col) ln) lvl $ formatTxts t ts
     where
-      takeLineBreak = takeWhile1 $ \w -> w == '\n' || w == '\r'
       level = choice [string "[error]" *> return Error, string "[warn]" *> return Warning]
       lineStart = level <* space
       sepChar = ':'
       formatTxts t [] = Vector.singleton t
       formatTxts t ts = Vector.fromList $ t : init ts
-      column = level *> ((length <$> many1 space) <* "^\n")
+      column' = level *> ((length <$> many1 space) <* "^\n")
 
 cleanEC :: Parser Text
 cleanEC = choice [noEC, withEC]
@@ -62,6 +61,9 @@ cleanEC = choice [noEC, withEC]
     isEscEnd 109 = True
     isEscEnd _ = False
 
+untilLineBreak :: Parser Text
 untilLineBreak = takeWhile1 $ \w -> w /= '\n' && w /= '\r'
+
+end :: Parser ()
 end = choice [const () <$> "\n", endOfInput, return ()]
 
