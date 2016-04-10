@@ -1,0 +1,99 @@
+name:                   sarsi
+version:                0.1
+license:                Apache-2.0
+license-file:           LICENSE
+author:                 Alois Cochard
+maintainer:             alois.cochard@gmail.com
+copyright:              Copyright (c) 2016 Alois Cochard
+category:               Development
+build-type:             Simple
+cabal-version:          >=1.10
+
+library
+  default-language:     Haskell2010
+  hs-source-dirs:       src
+  ghc-options:          -Wall
+  exposed-modules:
+    Codec.Sarsi
+    Codec.Sarsi.GHC
+    Sarsi
+    Sarsi.Consumer
+    Sarsi.Producer
+    Sarsi.Trace
+    -- TODO Extract in a `codec-ghc-log` module
+    Codec.GHC.Log
+    -- TODO Extract in a `machines-attoparsec` module
+    Data.Attoparsec.Machine
+    Data.Attoparsec.Text.Machine
+  build-depends:
+      base                  >= 4.6.0.1    && < 5
+    , attoparsec            >= 0.12       && < 0.14
+    , binary                >= 0.7        && < 0.9
+    , bytestring            >= 0.10       && < 0.11
+    , containers            >= 0.5        && < 0.6
+    , cryptonite            >= 0.10       && < 0.14
+    , directory             >= 1.2        && < 1.3
+    , filepath              >= 1.4        && < 1.5
+    , machines              >= 0.6        && < 0.7
+    , machines-binary       >= 0.2.0.1    && < 0.3
+    , machines-process      >= 0.2.0.5    && < 0.3
+    , machines-io           >= 0.2.0.1    && < 0.3
+    , msgpack               >= 1.0        && < 1.1
+    , network               >= 2.6        && < 2.7
+    , process               >= 1.1        && < 1.5
+    , text                  >= 1.2        && < 1.3
+    , vector                >= 0.10       && < 0.12
+
+executable sarsi 
+  main-is:              Main.hs
+  build-depends:       
+      base
+    , sarsi
+  hs-source-dirs:       sarsi
+  ghc-options:          -Wall
+  default-language:     Haskell2010
+
+
+executable sarsi-hs
+  main-is:              Main.hs
+  other-modules:
+  build-depends:       
+      base
+    , sarsi
+    , machines
+    , machines-io
+    , machines-process
+    , process
+    , text
+    , fsnotify              >= 0.2        && < 0.3
+  hs-source-dirs:       sarsi-hs
+  ghc-options:          -Wall -dynamic
+  default-language:     Haskell2010
+
+executable sarsi-nvim
+  main-is:              Main.hs
+  other-modules:
+    -- TODO Extract in a mspgack specific packages.
+    -- Data.MessagePack.ToJSON
+    Data.MessagePack.RPC
+    -- TODO Extract in a lightweight nvim client.
+    NVIM.Client
+    -- NVIM.Info
+  build-depends:       
+      base
+    , sarsi
+    , binary
+    , bytestring
+    , containers
+    , machines
+    , machines-binary
+    , machines-io
+    , msgpack
+    , network
+    , process
+    , text
+    , vector
+    , unordered-containers  >= 0.2        && < 0.3
+  hs-source-dirs:       sarsi-nvim
+  ghc-options:          -Wall -dynamic
+  default-language:     Haskell2010
