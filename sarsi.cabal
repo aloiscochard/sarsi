@@ -1,13 +1,18 @@
-name:                   sarsi
-version:                0.1
-license:                Apache-2.0
-license-file:           LICENSE
-author:                 Alois Cochard
-maintainer:             alois.cochard@gmail.com
-copyright:              Copyright (c) 2016 Alois Cochard
-category:               Development
-build-type:             Simple
-cabal-version:          >=1.10
+name:                sarsi
+version:             0.0.0.0
+synopsis:            A universal quickfix toolkit and his protocol.
+ 
+description:
+  Usage overview can be found in the <http://github.com/aloiscochard/sarsi#sarsi README>.
+
+homepage:            http://github.com/aloiscochard/sarsi
+license:             Apache-2.0
+license-file:        LICENSE
+author:              Alois Cochard
+maintainer:          alois.cochard@gmail.com
+category:            Development
+build-type:          Simple
+cabal-version:       >=1.10
 
 library
   default-language:     Haskell2010
