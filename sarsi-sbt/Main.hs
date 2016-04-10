@@ -5,7 +5,7 @@ import Codec.Sarsi.SBT.Machine (eventProcess)
 import Data.Machine (ProcessT, (<~), asParts, auto, autoM, runT_)
 import Sarsi.Producer (produce)
 import System.Environment (getArgs)
-import System.Exit (ExitCode)
+import System.Exit (ExitCode, exitWith)
 import System.Process (CreateProcess, StdStream(..), shell, std_in, std_out, std_err)
 import System.Process.Machine (callProcessMachines, mStdOut)
 import System.IO (BufferMode(NoBuffering), hSetBuffering, stdin, stdout)
@@ -27,15 +27,15 @@ callShell cmd sink = callProcessMachines byChunk createProc (mStdOut pipeline)
     echoText h = autoM $ (\txt -> TextIO.hPutStr h txt >> return txt)
     createProc  = (shell cmd) { std_in = Inherit, std_out = CreatePipe }
 
-producer :: String -> ProcessT IO Event Event -> IO ()
+producer :: String -> ProcessT IO Event Event -> IO ExitCode
 producer cmd sink = do
   (ec, _)   <- callShell cmd sink
-  putStrLn $ concat [title, ": ", show ec]
-  return ()
+  return ec
 
 main :: IO ()
 main = do
   hSetBuffering stdin NoBuffering
   hSetBuffering stdout NoBuffering
-  args      <- getArgs
-  produce "." $ producer $ concat $ List.intersperse " " ("sbt":args)
+  args  <- getArgs
+  ec    <- produce "." $ producer $ concat $ List.intersperse " " ("sbt":args)
+  exitWith ec
