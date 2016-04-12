@@ -1,7 +1,7 @@
 module Main where
 
 import Distribution.Text
-import Sarsi (mkSockAddr, title)
+import Sarsi (getBroker, getSockAddr, getTopic, title)
 import Sarsi.Trace (traceHS, traceSBT)
 import System.IO (stdin)
 import System.Environment (getArgs)
@@ -14,5 +14,6 @@ main = getArgs >>= run where
   run ["--trace-sbt"] = traceSBT stdin
   run ["--version"]   = putStrLn $ concat [title, "-", display version]
   run _ = do
-    sock <- mkSockAddr "."
-    print sock
+    b     <- getBroker
+    t     <- getTopic b "."
+    print $ getSockAddr t

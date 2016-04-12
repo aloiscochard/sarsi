@@ -3,7 +3,7 @@ module Sarsi where
 import Crypto.Hash (Digest, hash)
 import Crypto.Hash.Algorithms (MD5)
 import Network.Socket (Family(AF_UNIX), SockAddr(SockAddrUnix), Socket, SocketType(Stream), defaultProtocol, socket)
-import System.Directory (getTemporaryDirectory, doesFileExist, makeAbsolute, removeFile)
+import System.Directory (getTemporaryDirectory, createDirectory, doesDirectoryExist, doesFileExist, makeAbsolute, removeFile)
 import System.FilePath ((</>))
 
 import qualified Data.ByteString.Char8 as BSC8
@@ -11,26 +11,31 @@ import qualified Data.ByteString.Char8 as BSC8
 title :: String
 title = "sarsi"
 
--- TODO Windows compat: create a TCP socket.
+newtype Broker = Broker FilePath
+newtype Topic  = Topic  FilePath
 
-mkSocket :: IO Socket
-mkSocket = do
+getBroker :: IO Broker
+getBroker = do
+  tmp <- getTemporaryDirectory
+  let bp = tmp </> title
+  let broker = Broker bp
+  exists <- doesDirectoryExist bp
+  if exists then return broker else createDirectory bp >> return broker
+
+getTopic :: Broker -> FilePath -> IO Topic
+getTopic (Broker bp) fp' = do
+  fp    <- makeAbsolute fp'
+  return . Topic $ bp </> (show $ (hash $ BSC8.pack fp :: Digest MD5))
+
+createSocket :: IO Socket
+createSocket = do
   socket AF_UNIX Stream defaultProtocol
 
-mkSockAddr :: FilePath -> IO SockAddr
-mkSockAddr fp = do
-  path  <- getSockPath fp
-  return . SockAddrUnix $ path
-
-mkSockAddr' :: FilePath -> IO SockAddr
-mkSockAddr' fp = do
-  path  <- getSockPath fp
+createSockAddr :: Topic -> IO SockAddr
+createSockAddr t@(Topic path) = do
   exists <- doesFileExist path
   if (exists) then removeFile path else return ()
-  mkSockAddr fp
+  return $ getSockAddr t
 
-getSockPath :: FilePath -> IO FilePath
-getSockPath fp' = do
-  fp    <- makeAbsolute fp'
-  tmp <- getTemporaryDirectory
-  return $ tmp </> concat [title, "-", show $ (hash $ BSC8.pack fp :: Digest MD5)]
+getSockAddr :: Topic -> SockAddr
+getSockAddr (Topic path) = SockAddrUnix path

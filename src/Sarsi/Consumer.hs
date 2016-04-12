@@ -5,7 +5,7 @@ import Codec.Sarsi (Event, getEvent)
 import Data.Binary.Machine (streamGet)
 import Data.Machine (ProcessT, (<~), asParts, auto, runT, runT_)
 import Network.Socket (Socket, accept, bind, listen, close, socketToHandle)
-import Sarsi (mkSocket, mkSockAddr')
+import Sarsi (createSocket, createSockAddr, getBroker, getTopic)
 import System.IO (Handle, IOMode(ReadMode), hClose)
 import System.IO.Machine (IOSink, IOSource, byChunk, sourceHandle)
 
@@ -26,8 +26,10 @@ consume' fp f = consumeWith fp g
 
 consumeWith :: FilePath -> (Handle -> IO (Maybe a)) -> IO a
 consumeWith fp f = do
-  sock  <- mkSocket
-  addr  <- mkSockAddr' fp
+  b     <- getBroker
+  t     <- getTopic b fp
+  sock  <- createSocket
+  addr  <- createSockAddr t
   bind sock addr
   listen sock 1
   a <- serve sock f
