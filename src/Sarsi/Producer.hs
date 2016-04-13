@@ -16,8 +16,8 @@ import System.IO.Machine (IOSink, byChunk, sinkIO, sinkHandle, sourceIO)
 produce :: Topic -> (IOSink Event -> IO a) -> IO a
 produce t f = do
   chan    <- newChan
-  feeder  <- async $ f $ sinkIO $ writeChan chan
   server  <- async $ bracket bindSock close (serve (process chan))
+  feeder  <- async $ f $ sinkIO $ writeChan chan
   a       <- wait feeder
   cancel server
   removeTopic t
