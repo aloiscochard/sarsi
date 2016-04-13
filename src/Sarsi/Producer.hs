@@ -1,24 +1,45 @@
 {-# LANGUAGE Rank2Types #-}
 module Sarsi.Producer where
 
-import Codec.Sarsi (Event(..), putEvent)
+import Codec.Sarsi (Event, putEvent)
+import Control.Concurrent (forkIO)
+import Control.Exception (bracket)
+import Control.Concurrent.Async (async, cancel, wait)
+import Control.Concurrent.Chan (dupChan, newChan, readChan, writeChan)
 import Data.Binary.Machine (processPut)
-import Data.Machine (ProcessT, (<~), auto, asParts)
-import Data.Machine.Fanout (fanout)
-import Network.Socket (connect, socketToHandle)
-import Sarsi (createSocket, getBroker, getTopic, getSockAddr)
-import System.IO (IOMode(AppendMode), hClose)
-import System.IO.Machine (byChunk, sinkHandle)
+import Data.Machine ((<~), runT_)
+import Network.Socket (Socket, accept, bind, close, connect, listen, socketToHandle)
+import Sarsi (Topic, createSocket, createSockAddr)
+import System.IO (IOMode(ReadMode), Handle, hClose)
+import System.IO.Machine (IOSink, byChunk, sinkIO, sinkHandle, sourceIO)
 
-produce :: FilePath -> (ProcessT IO Event Event -> IO a) -> IO a
-produce fp f = do
-  b     <- getBroker
-  t     <- getTopic b fp
-  sock  <- createSocket
-  connect sock $ getSockAddr t
-  h     <- socketToHandle sock AppendMode
-  -- TODO use sinkPart_
-  res   <- f $ asParts <~ fanout [auto (:[]), auto (const []) <~ sinkHandle byChunk h <~ processPut putEvent]
-  hClose h
-  return res
+produce :: Topic -> (IOSink Event -> IO a) -> IO a
+produce t f = do
+  chan    <- newChan
+  feeder  <- async $ f $ sinkIO $ writeChan chan
+  server  <- async $ bracket bindSock close (serve (process chan))
+  a       <- wait feeder
+  cancel server
+  return a
+    where
+      bindSock = do
+        sock  <- createSocket
+        addr  <- createSockAddr t
+        bind sock addr
+        listen sock 1
+        return sock
+      process chan' h = do
+        chan <- dupChan chan'
+        _    <- forkIO . runT_ $ sinkHandle byChunk h <~ processPut putEvent <~ (sourceIO $ readChan chan)
+        return Nothing
 
+serve :: (Handle -> IO (Maybe a)) -> Socket -> IO a
+serve f sock = bracket acceptHandle hClose process
+  where
+    acceptHandle = do
+      (conn, _) <- accept sock
+      h         <- socketToHandle conn ReadMode
+      return h
+    process h = do
+      a         <- f h
+      maybe (serve f sock) return a

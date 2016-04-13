@@ -4,7 +4,7 @@ import Codec.Sarsi (Event(..), Level(..), Location(..), Message(..))
 import Data.Machine ((<~), asParts, auto, scan)
 import Data.MessagePack.Object (Object(..), toObject)
 import NVIM.Client (Command(..), runCommand)
-import Sarsi (title)
+import Sarsi (getBroker, getTopic, title)
 import Sarsi.Consumer (consume_)
 import System.IO (BufferMode(NoBuffering), hSetBuffering, stdin, stdout)
 import System.IO.Machine (sinkIO)
@@ -46,7 +46,9 @@ main :: IO ()
 main = do
   hSetBuffering stdin NoBuffering
   hSetBuffering stdout NoBuffering
-  consume_ "." $ sinkIO publish <~ asParts <~ auto unpack <~ scan f (True, [])
+  b     <- getBroker
+  t     <- getTopic b "."
+  consume_ t $ sinkIO publish <~ asParts <~ auto unpack <~ scan f (True, [])
     where
       f (first, _) event = convert first event
       unpack (_, xs) = xs

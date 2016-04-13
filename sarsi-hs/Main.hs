@@ -7,6 +7,7 @@ import Codec.Sarsi.GHC (fromGHCLog)
 import Data.Attoparsec.Text.Machine (streamParser)
 import Data.Machine (ProcessT, (<~), asParts, auto, autoM, prepended, runT_, source)
 import Data.List (foldl')
+import Sarsi (getBroker, getTopic)
 import Sarsi.Producer (produce)
 import System.Environment (getArgs)
 import System.IO (stderr)
@@ -53,5 +54,7 @@ producer cmd sink = do
 main :: IO ()
 main = do
   args  <- getArgs
-  ec    <- produce "." $ producer (concat $ List.intersperse " " args)
+  b     <- getBroker
+  t     <- getTopic b "."
+  ec    <- produce t $ producer (concat $ List.intersperse " " args)
   exitWith ec
