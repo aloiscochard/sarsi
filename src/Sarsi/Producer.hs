@@ -7,17 +7,17 @@ import Control.Exception (bracket)
 import Control.Concurrent.Async (async, cancel, wait)
 import Control.Concurrent.Chan (dupChan, newChan, readChan, writeChan)
 import Data.Binary.Machine (processPut)
-import Data.Machine ((<~), runT_)
+import Data.Machine (ProcessT, (<~), runT_, sinkPart_)
 import Network.Socket (Socket, accept, bind, close, connect, listen, socketToHandle)
 import Sarsi (Topic, createSocket, createSockAddr, removeTopic)
 import System.IO (IOMode(WriteMode), Handle, hClose)
 import System.IO.Machine (IOSink, byChunk, sinkIO, sinkHandle, sourceIO)
 
-produce :: Topic -> (IOSink Event -> IO a) -> IO a
+produce :: Topic -> (ProcessT IO Event Event -> IO a) -> IO a
 produce t f = do
   chan    <- newChan
   server  <- async $ bracket bindSock close (serve (process chan))
-  feeder  <- async $ f $ sinkIO $ writeChan chan
+  feeder  <- async $ f $ sinkPart_ (\x -> (x, x)) (sinkIO $ writeChan chan)
   a       <- wait feeder
   cancel server
   removeTopic t

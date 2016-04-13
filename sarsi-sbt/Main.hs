@@ -25,7 +25,7 @@ mStdOut_ :: ProcessT IO a b -> ProcessMachines a a0 k0 -> IO ()
 mStdOut_ mp (_, Just stdOut, _)  = runT_ $ mp <~ stdOut
 mStdOut_ _  _                    = return ()
 
-producer :: String -> IOSink Event -> IO (ExitCode)
+producer :: String -> ProcessT IO Event Event -> IO (ExitCode)
 producer cmd sink = do
   (ec, _) <- callProcessMachines byChunk createProc (mStdOut_ pipeline)
   return ec
