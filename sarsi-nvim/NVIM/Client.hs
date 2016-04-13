@@ -11,7 +11,6 @@ import Data.MessagePack.Object (Object(..), toObject)
 import Data.MessagePack.RPC (Answer(..), Request(..), Message(..), getMessage, putRequest)
 import Data.Text (Text)
 import System.IO (Handle, stdin, stdout)
-
 import qualified Data.Text as Text
 import qualified Data.Vector as Vector
 

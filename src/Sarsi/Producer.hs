@@ -10,7 +10,7 @@ import Data.Binary.Machine (processPut)
 import Data.Machine ((<~), runT_)
 import Network.Socket (Socket, accept, bind, close, connect, listen, socketToHandle)
 import Sarsi (Topic, createSocket, createSockAddr)
-import System.IO (IOMode(ReadMode), Handle, hClose)
+import System.IO (IOMode(WriteMode), Handle, hClose)
 import System.IO.Machine (IOSink, byChunk, sinkIO, sinkHandle, sourceIO)
 
 produce :: Topic -> (IOSink Event -> IO a) -> IO a
@@ -38,7 +38,7 @@ serve f sock = bracket acceptHandle hClose process
   where
     acceptHandle = do
       (conn, _) <- accept sock
-      h         <- socketToHandle conn ReadMode
+      h         <- socketToHandle conn WriteMode
       return h
     process h = do
       a         <- f h

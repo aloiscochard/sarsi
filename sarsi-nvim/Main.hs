@@ -5,7 +5,7 @@ import Data.Machine ((<~), asParts, auto, scan)
 import Data.MessagePack.Object (Object(..), toObject)
 import NVIM.Client (Command(..), runCommand)
 import Sarsi (getBroker, getTopic, title)
-import Sarsi.Consumer (consume_)
+import Sarsi.Consumer (consumeOrWait_)
 import System.IO (BufferMode(NoBuffering), hSetBuffering, stdin, stdout)
 import System.IO.Machine (sinkIO)
 
@@ -48,7 +48,7 @@ main = do
   hSetBuffering stdout NoBuffering
   b     <- getBroker
   t     <- getTopic b "."
-  consume_ t $ sinkIO publish <~ asParts <~ auto unpack <~ scan f (True, [])
+  consumeOrWait_ t $ sinkIO publish <~ asParts <~ auto unpack <~ scan f (True, [])
     where
       f (first, _) event = convert first event
       unpack (_, xs) = xs
