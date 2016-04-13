@@ -9,7 +9,7 @@ import Control.Concurrent.Chan (dupChan, newChan, readChan, writeChan)
 import Data.Binary.Machine (processPut)
 import Data.Machine ((<~), runT_)
 import Network.Socket (Socket, accept, bind, close, connect, listen, socketToHandle)
-import Sarsi (Topic, createSocket, createSockAddr)
+import Sarsi (Topic, createSocket, createSockAddr, removeTopic)
 import System.IO (IOMode(WriteMode), Handle, hClose)
 import System.IO.Machine (IOSink, byChunk, sinkIO, sinkHandle, sourceIO)
 
@@ -20,6 +20,7 @@ produce t f = do
   server  <- async $ bracket bindSock close (serve (process chan))
   a       <- wait feeder
   cancel server
+  removeTopic t
   return a
     where
       bindSock = do

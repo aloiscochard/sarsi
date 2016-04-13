@@ -28,6 +28,9 @@ getTopic b@(Broker bp) fp' = do
   fp    <- makeAbsolute fp'
   return $ Topic b $ bp </> (show $ (hash $ BSC8.pack fp :: Digest MD5))
 
+removeTopic :: Topic -> IO ()
+removeTopic (Topic _ fp) = removeFile fp
+
 createSocket :: IO Socket
 createSocket = do
   socket AF_UNIX Stream defaultProtocol
