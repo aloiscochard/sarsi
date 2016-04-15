@@ -1,11 +1,11 @@
 module Main where
 
 import Codec.Sarsi (Event(..), Level(..), Location(..), Message(..))
-import Data.Machine ((<~), asParts, auto, scan)
+import Data.Machine (ProcessT, (<~), asParts, auto, final, scan, sinkPart_, runT)
 import Data.MessagePack.Object (Object(..), toObject)
 import NVIM.Client (Command(..), runCommand)
-import Sarsi (title)
-import Sarsi.Consumer (consume_)
+import Sarsi (getBroker, getTopic, title)
+import Sarsi.Consumer (consumeOrWait)
 import System.IO (BufferMode(NoBuffering), hSetBuffering, stdin, stdout)
 import System.IO.Machine (sinkIO)
 
@@ -46,11 +46,16 @@ main :: IO ()
 main = do
   hSetBuffering stdin NoBuffering
   hSetBuffering stdout NoBuffering
-  consume_ "." $ sinkIO publish <~ asParts <~ auto unpack <~ scan f (True, [])
+  b     <- getBroker
+  t     <- getTopic b "."
+  consumeOrWait t consumer
     where
-      f (first, _) event = convert first event
-      unpack (_, xs) = xs
+      consumer Nothing  src = consumer (Just True) src
+      consumer (Just b) src = do
+        b' <- runT $ final <~ sinkPart_ id (sinkIO publish <~ asParts) <~ converter b <~ src
+        return (Left $ head b')
+      converter :: Bool -> ProcessT IO Event (Bool, [Command])
+      converter b = scan f (b, []) where f (first, _) event = convert first event
       publish cmd = do
-        -- TODO Log failed command in a file (or print to stderr?).
         _ <- runCommand cmd
         return ()

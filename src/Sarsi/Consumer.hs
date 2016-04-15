@@ -2,44 +2,47 @@
 module Sarsi.Consumer where
 
 import Codec.Sarsi (Event, getEvent)
-import Data.Binary.Machine (streamGet)
-import Data.Machine (ProcessT, (<~), asParts, auto, runT, runT_)
-import Network.Socket (Socket, accept, bind, listen, close, socketToHandle)
-import Sarsi (createSocket, createSockAddr, getBroker, getTopic)
-import System.IO (Handle, IOMode(ReadMode), hClose)
-import System.IO.Machine (IOSink, IOSource, byChunk, sourceHandle)
+import Control.Concurrent.MVar (newEmptyMVar, takeMVar, putMVar)
+import Control.Exception (IOException, bracket, try)
+import Data.Binary.Machine (processGet)
+import Data.Machine ((<~), auto, asParts, runT_)
+import Network.Socket (connect, socketToHandle)
+import Sarsi (Broker(..), Topic(..), createSocket, getSockAddr)
+import System.FSNotify (eventPath, watchDir, withManager)
+import System.IO (IOMode(ReadMode), hClose, hWaitForInput)
+import System.IO.Machine (IOSink, IOSource, byChunkOf, sourceHandle)
 
--- TODO Use bracket to close properly in case of error
+consumeOrWait :: Topic -> (Maybe s -> IOSource Event -> IO (Either s a)) -> IO a
+consumeOrWait topic@(Topic (Broker bp) tp) f = do
+  res <- consume topic f
+  either (const $ withManager waitAndRetry) return res
+    where
+      waitAndRetry mng = do
+        lck <- newEmptyMVar
+        stop <- watchDir mng bp pred' $ const $ putMVar lck ()
+        takeMVar lck
+        stop
+        consumeOrWait topic f
+      pred' e = eventPath e == tp
 
-consume :: FilePath -> ProcessT IO Event a -> IO [a]
-consume fp sink = consume' fp f where f p = fmap Just $ runT $ sink <~ p
+consumeOrWait_ :: Topic -> IOSink Event  -> IO a
+consumeOrWait_ topic@(Topic _ _) sink =
+    consumeOrWait topic f where f _ src = fmap (const $ Left ()) $ runT_ $ sink <~ src
 
-consume_ :: FilePath -> IOSink Event -> IO ()
-consume_ fp sink = consume' fp f where f p = fmap (const Nothing) $ runT_ $ sink <~ p
+consume :: Topic -> (Maybe s -> IOSource Event -> IO (Either s a)) -> IO (Either IOException a)
+consume topic f = try $ consume' topic f
 
-consume' :: FilePath -> (IOSource Event -> IO (Maybe b)) -> IO b
-consume' fp f = consumeWith fp g
+consume' :: Topic -> (Maybe s -> IOSource Event -> IO (Either s a)) -> IO a
+consume' topic f = bracket createHandle hClose (process Nothing)
   where
-    g h = f $ asParts <~ auto unpack <~ streamGet getEvent <~ sourceHandle (byChunk) h
+    createHandle = do
+      sock  <- createSocket
+      connect sock $ getSockAddr topic
+      socketToHandle sock ReadMode
+    process s h = do
+      sa  <- f s $ asParts <~ auto unpack <~ processGet getEvent <~ sourceHandle (byChunkOf 1) h
+      _   <- hWaitForInput h (-1)
+      either (continue h) return sa
+        where continue h' s' = process (Just s') h'
     unpack (Right e) = [e]
     unpack (Left _) = []
-
-consumeWith :: FilePath -> (Handle -> IO (Maybe a)) -> IO a
-consumeWith fp f = do
-  b     <- getBroker
-  t     <- getTopic b fp
-  sock  <- createSocket
-  addr  <- createSockAddr t
-  bind sock addr
-  listen sock 1
-  a <- serve sock f
-  close sock
-  return a
-
-serve :: Socket -> (Handle -> IO (Maybe a)) -> IO a
-serve sock f = do
-  (conn, _) <- accept sock
-  h         <- socketToHandle conn ReadMode
-  a         <- f h
-  hClose h
-  maybe (serve sock f) return a
