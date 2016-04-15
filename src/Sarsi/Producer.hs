@@ -1,24 +1,29 @@
 {-# LANGUAGE Rank2Types #-}
 module Sarsi.Producer where
 
-import Codec.Sarsi (Event, putEvent)
-import Control.Concurrent (forkIO)
-import Control.Exception (bracket)
+import Codec.Sarsi (Event(Start), putEvent)
+import Control.Exception (IOException, bracket, tryJust)
 import Control.Concurrent.Async (async, cancel, wait)
 import Control.Concurrent.Chan (dupChan, newChan, readChan, writeChan)
+import Control.Concurrent.MVar (modifyMVar_, newMVar, readMVar)
+import Control.Concurrent.STM (atomically)
+import Control.Concurrent.STM.TQueue (newTQueue, tryReadTQueue, writeTQueue)
 import Data.Binary.Machine (processPut)
-import Data.Machine (ProcessT, (<~), runT_, sinkPart_)
-import Network.Socket (Socket, accept, bind, close, connect, listen, socketToHandle)
+import Data.Machine (ProcessT, (<~), runT_, sinkPart_, prepended)
+import Network.Socket (Socket, accept, bind, close, listen, socketToHandle)
 import Sarsi (Topic, createSocket, createSockAddr, removeTopic)
 import System.IO (IOMode(WriteMode), Handle, hClose)
-import System.IO.Machine (IOSink, byChunk, sinkIO, sinkHandle, sourceIO)
+import System.IO.Machine (byChunk, sinkIO, sinkHandle, sourceIO)
 
 produce :: Topic -> (ProcessT IO Event Event -> IO a) -> IO a
 produce t f = do
+  conns   <- atomically $ newTQueue
   chan    <- newChan
-  server  <- async $ bracket bindSock close (serve (process chan))
-  feeder  <- async $ f $ sinkPart_ (\x -> (x, x)) (sinkIO $ writeChan chan)
+  state   <- newMVar []
+  server  <- async $ bracket bindSock close (serve (process conns chan state))
+  feeder  <- async $ f $ sinkPart_ (\x -> (x, x)) (sinkIO $ feed chan state)
   a       <- wait feeder
+  waitFinish conns
   cancel server
   removeTopic t
   return a
@@ -29,10 +34,26 @@ produce t f = do
         bind sock addr
         listen sock 1
         return sock
-      process chan' h = do
+      process conns chan' state h = do
         chan <- dupChan chan'
-        _    <- forkIO . runT_ $ sinkHandle byChunk h <~ processPut putEvent <~ (sourceIO $ readChan chan)
+        es   <- readMVar state
+        conn <- async $ do
+          runT_ $ sinkHandle byChunk h <~ processPut putEvent <~ (prepended $ reverse es) <~ (sourceIO $ readChan chan)
+          hClose h
+        atomically $ writeTQueue conns conn
         return Nothing
+      feed chan state e = do
+        modifyMVar_ state $ case e of
+          (Start _) -> const $ return [e]
+          _         -> return . (:) e
+        writeChan chan e
+      waitFinish conns = do
+        conn <- atomically $ tryReadTQueue conns
+        _    <- tryJust io $ maybe (return ()) wait conn
+        return ()
+          where
+            io :: IOException -> Maybe ()
+            io _ = Just ()
 
 serve :: (Handle -> IO (Maybe a)) -> Socket -> IO a
 serve f sock = bracket acceptHandle hClose process

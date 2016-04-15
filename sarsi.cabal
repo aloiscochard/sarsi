@@ -50,6 +50,7 @@ library
     , msgpack               >= 1.0        && < 1.1
     , network               >= 2.6        && < 2.7
     , process               >= 1.1        && < 1.5
+    , stm                   >= 2.4        && < 2.5
     , text                  >= 1.2        && < 1.3
     , vector                >= 0.10       && < 0.12
 
@@ -62,7 +63,7 @@ executable sarsi
     , Cabal
     , sarsi
   hs-source-dirs:       sarsi
-  ghc-options:          -Wall
+  ghc-options:          -Wall -threaded
   default-language:     Haskell2010
 
 
@@ -78,7 +79,7 @@ executable sarsi-hs
     , text
     , fsnotify              >= 0.2        && < 0.3
   hs-source-dirs:       sarsi-hs
-  ghc-options:          -Wall -dynamic
+  ghc-options:          -Wall -dynamic -threaded
   default-language:     Haskell2010
 
 executable sarsi-nvim
@@ -107,7 +108,7 @@ executable sarsi-nvim
     , vector
     , unordered-containers  >= 0.2        && < 0.3
   hs-source-dirs:       sarsi-nvim
-  ghc-options:          -Wall -dynamic
+  ghc-options:          -Wall -dynamic -threaded
   default-language:     Haskell2010
 
 executable sarsi-sbt
@@ -122,5 +123,5 @@ executable sarsi-sbt
     , process
     , text
   hs-source-dirs:       sarsi-sbt
-  ghc-options:          -Wall -dynamic
+  ghc-options:          -Wall -dynamic -threaded
   default-language:     Haskell2010
