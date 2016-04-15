@@ -1,5 +1,5 @@
 name:                sarsi
-version:             0.0.1.0
+version:             0.0.2.0
 synopsis:            A universal quickfix toolkit and his protocol.
  
 description:
@@ -61,7 +61,7 @@ executable sarsi
   build-depends:       
       base
     , Cabal
-    , sarsi
+    , sarsi                 == 0.0.2.0
   hs-source-dirs:       sarsi
   ghc-options:          -Wall -threaded
   default-language:     Haskell2010
@@ -71,7 +71,7 @@ executable sarsi-hs
   main-is:              Main.hs
   build-depends:       
       base
-    , sarsi                 == 0.0.1.0
+    , sarsi                 == 0.0.2.0
     , machines
     , machines-io
     , machines-process
@@ -93,7 +93,7 @@ executable sarsi-nvim
     -- NVIM.Info
   build-depends:       
       base
-    , sarsi                 == 0.0.1.0
+    , sarsi                 == 0.0.2.0
     , machines
     , binary
     , bytestring
@@ -116,7 +116,7 @@ executable sarsi-sbt
   other-modules:
   build-depends:       
       base
-    , sarsi                 == 0.0.1.0
+    , sarsi                 == 0.0.2.0
     , machines
     , machines-io
     , machines-process
