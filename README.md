@@ -6,6 +6,14 @@ Sarsi
 
 A universal quickfix toolkit and his protocol.
 
+### Quick fixing
+
+It's basically fixing inside your text editor/IDE the warnings or errors returned by the compiler.
+
+![https://media.giphy.com/media/3o6ozkwoL7wHOjer9C/giphy.gif](https://media.giphy.com/media/3o6ozkwoL7wHOjer9C/giphy.gif)
+
+*A sample session using `sarsi-hs` and `sarsi-nvim`.*
+
 # Philosophy
 
 *[Sarsi](https://en.wiktionary.org/wiki/sarcio#Latin)* is at it's core a binary protocol to exchange quickfix messages, it approach the operating system as an integrated development environment, it's design follow the holy [Unix philosophy](https://en.wikipedia.org/wiki/Unix_philosophy) principles.
