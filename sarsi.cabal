@@ -66,7 +66,6 @@ executable sarsi
   ghc-options:          -Wall -threaded
   default-language:     Haskell2010
 
-
 executable sarsi-hs
   main-is:              Main.hs
   build-depends:       
@@ -124,4 +123,19 @@ executable sarsi-sbt
     , text
   hs-source-dirs:       sarsi-sbt
   ghc-options:          -Wall -dynamic -threaded
+  default-language:     Haskell2010
+
+executable sarsi-vi
+  main-is:              Main.hs
+  build-depends:       
+      base
+    , sarsi                 == 0.0.1.0
+    , directory
+    , filepath
+    , machines
+    , machines-io
+    , text
+    , vector
+  hs-source-dirs:       sarsi-vi
+  ghc-options:          -Wall -dynamic
   default-language:     Haskell2010

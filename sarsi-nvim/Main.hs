@@ -1,7 +1,7 @@
 module Main where
 
 import Codec.Sarsi (Event(..), Level(..), Location(..), Message(..))
-import Data.Machine (ProcessT, (<~), asParts, auto, final, scan, sinkPart_, runT)
+import Data.Machine (ProcessT, (<~), asParts, final, scan, sinkPart_, runT)
 import Data.MessagePack.Object (Object(..), toObject)
 import NVIM.Client (Command(..), runCommand)
 import Sarsi (getBroker, getTopic, title)
