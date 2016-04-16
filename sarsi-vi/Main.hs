@@ -35,9 +35,10 @@ data LogEvent = LogEvent Action Text deriving Show
 data Command = Throw LogEvent | Echo String
 
 convert :: Bool -> Event -> (Bool, [Command])
-convert first (Notify msg)  = (False, [Throw e]) where
-  e = LogEvent mode $ toVi msg
-  mode = if first then Replace else Append
+convert first (Notify msg@(Message loc lvl _))  = (False, [Throw e, Echo $ concat [show loc, " ", show lvl]])
+  where
+    e = LogEvent mode $ toVi msg
+    mode = if first then Replace else Append
 convert _     e             = (True, [Echo $show e])
 
 converter :: Bool -> ProcessT IO Event (Bool, [Command])
