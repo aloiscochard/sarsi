@@ -18,12 +18,13 @@ That's basically what `sarsi` is doing, and will always do, any other integratio
 
 #### Producers
 
- - `sarsi-hs` - A generic command line wrapper for Haskell tools (GHC/Cabal/[Stack](http://haskellstack.org/)/...)
- - `sarsi-sbt` - A [SBT](http://www.scala-sbt.org/) specific wrapper for the Scala programming language
+ - `sarsi-hs` - Command line wrapper for Haskell tools (GHC/Cabal/[Stack](http://haskellstack.org/)/...)
+ - `sarsi-sbt` - [SBT](http://www.scala-sbt.org/) specific wrapper for the Scala programming language
 
 #### Consumers
 
- - `sarsi-nvim` - A lightweight [Neovim](https://neovim.io/) RPC client
+ - `sarsi-nvim` - [Neovim](https://neovim.io/) RPC client for realtime feedback
+ - `sarsi-vi` - Quickfix file generator which use a vi compatible format
 
 # Install
 
@@ -43,23 +44,17 @@ Alternatively, it can be installed from source using `stack`.
 	cd sarsi
 	stack install
 
-
-### Neovim Integration
-
-Once `sarsi` installed, simply add the following line in your `init.vim`.
-
-	call rpcstart('sarsi-nvim') 
-
-
 # Usage
 
 By default, when a consumer/producer start it will use a Unix pipe with a name generated according the directory in which it was launched.
 
 It basically means you have to start consumers/producers from the same directory for them to be connected.
 
+## Producers
+
 ### Haskell
 
-The `sarsi-hs` command line wrapper allow you to run an arbitrary command and get it's output transparently feeded into an active consumer.
+The `sarsi-hs` command line wrapper allow you to run an arbitrary command and get it's output transparently feeded into all active consumers.
 
 	sarsi-hs stack build
 
@@ -67,7 +62,7 @@ It works nicely with [entr](http://entrproject.org/), `inotifywait`, or any othe
 
 ```
 while sleep 1; do 
-  find ./**/*.hs *.cabal stack.yaml ! -path "./.stack-work/*" | entr -cdr sarsi-hs stack build; 
+  find . ! -path "./.stack-work/*" | grep '.hs\|.cabal\|stack.yaml' | entr -cdr sarsi-hs stack build; 
 done;
 ```
 
@@ -77,4 +72,43 @@ You can simply use it in place of your `sbt` command, interactively or not (you 
 
 	sarsi-sbt
 
-It will behind the scene call the `sbt` program available in the path.
+It will behind the scene call the `sbt` program available in the path and transparently forward the quick fixes produced to the available consumers.
+
+## Consumers
+
+
+### Neovim
+
+Once `sarsi` installed, simply add the following line in your `init.vim`.
+
+	call rpcstart('sarsi-nvim') 
+
+You'll see build updates directly in the editor and the default quickfix list will be updated asynchronously.
+
+Just use the usual `:cwindow` if you want to see the complete list of fixes or use `:cfirst`, `:cnext` and `:cprevious` to directly navigate between them.
+
+### Vi/Vim
+
+Due to the synchronous nature of `vi` you'll have to start the consumer in a dedicated terminal using the `sarsi-vi` command.
+
+The process will continuously maintain a quickfile located at `$(sarsi).vi` which you can open in the editor using ```:cfile `sarsi`.vi```.
+
+You could then even keep `sarsi-vi` running in a one-line terminal, sitting at the bottom of your synchronous editor while pretending your are using `nvim` as similar status update are printed in real-time.
+
+```
+sarsi-vi: starting haskell build
+sarsi-vi: build success
+sarsi-vi: starting haskell build
+sarsi-vi: /../sarsi-vi/Main.hs@40:3 Error
+sarsi-vi: build failure with 1 error(s)
+sarsi-vi: starting haskell build
+sarsi-vi: build success
+```
+
+#### Error fomat
+
+The output format used by `sarsi-vi` to generate the  `$(sarsi).vi` file is backward compatible with the default one used by `vi`/`vim`.
+
+The missing part is the level (warning/error), in order to have it taken into account you should add the following in your initialization script.
+
+`set efm=%f:%l:%c:%t\ %m`
