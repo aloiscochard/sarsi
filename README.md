@@ -91,7 +91,7 @@ Just use the usual `:cwindow` if you want to see the complete list of fixes or u
 
 Due to the synchronous nature of `vi` you'll have to start the consumer in a dedicated terminal using the `sarsi-vi` command.
 
-The process will continuously maintain a quickfile located at `$(sarsi).vi` which you can open in the editor using ```:cfile `sarsi`.vi```.
+The process will continuously maintain a quickfix file located at `$(sarsi).vi` which you can open in the editor using ```:cfile `sarsi`.vi```.
 
 You could then even keep `sarsi-vi` running in a one-line terminal, sitting at the bottom of your synchronous editor while pretending your are using `nvim` as similar status update are printed in real-time.
 
