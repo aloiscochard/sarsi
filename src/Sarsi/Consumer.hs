@@ -5,12 +5,12 @@ import Codec.Sarsi (Event, getEvent)
 import Control.Concurrent.MVar (newEmptyMVar, takeMVar, putMVar)
 import Control.Exception (IOException, bracket, try)
 import Data.Binary.Machine (processGet)
-import Data.Machine ((<~), auto, asParts, runT_)
+import Data.Machine ((<~), auto, asParts)
 import Network.Socket (connect, socketToHandle)
 import Sarsi (Broker(..), Topic(..), createSocket, getSockAddr)
 import System.FSNotify (eventPath, watchDir, withManager)
 import System.IO (IOMode(ReadMode), hClose, hWaitForInput)
-import System.IO.Machine (IOSink, IOSource, byChunkOf, sourceHandle)
+import System.IO.Machine (IOSource, byChunkOf, sourceHandle)
 
 consumeOrWait :: Topic -> (Maybe s -> IOSource Event -> IO (Either s a)) -> IO a
 consumeOrWait topic@(Topic (Broker bp) tp) f = do
@@ -24,10 +24,6 @@ consumeOrWait topic@(Topic (Broker bp) tp) f = do
         stop
         consumeOrWait topic f
       pred' e = eventPath e == tp
-
-consumeOrWait_ :: Topic -> IOSink Event  -> IO a
-consumeOrWait_ topic@(Topic _ _) sink =
-    consumeOrWait topic f where f _ src = fmap (const $ Left ()) $ runT_ $ sink <~ src
 
 consume :: Topic -> (Maybe s -> IOSource Event -> IO (Either s a)) -> IO (Either IOException a)
 consume topic f = try $ consume' topic f

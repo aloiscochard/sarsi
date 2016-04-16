@@ -11,7 +11,7 @@ import System.Exit (ExitCode, exitWith)
 import System.Process (StdStream(..), shell, std_in, std_out)
 import System.Process.Machine (ProcessMachines, callProcessMachines)
 import System.IO (BufferMode(NoBuffering), hSetBuffering, stdin, stdout)
-import System.IO.Machine (IOSink, byChunk)
+import System.IO.Machine (byChunk)
 
 import qualified Data.List as List
 import qualified Data.Text.IO as TextIO
