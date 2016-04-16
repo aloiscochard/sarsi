@@ -18,8 +18,8 @@ instance Show Event where
   show (Start lbl) = concat ["starting ", unpack lbl, " build"]
   show (Finish 0 0) = "build success"
   show (Finish 0 w) = concat ["build success with ", show w, " warning(s)"]
-  show (Finish e 0) = concat ["build fail with ", show e, " error(s)"]
-  show (Finish e w) = concat ["build fail with ", show e, " error(s) and ", show w, " warning(s)"]
+  show (Finish e 0) = concat ["build failure with ", show e, " error(s)"]
+  show (Finish e w) = concat ["build failure with ", show e, " error(s) and ", show w, " warning(s)"]
   show (Notify msg) = concat ["message=", show msg]
 
 getEvent :: Get Event
