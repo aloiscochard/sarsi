@@ -85,6 +85,21 @@ executable sarsi-hs
   ghc-options:          -Wall -dynamic -threaded
   default-language:     Haskell2010
 
+executable sarsi-elm
+  main-is:              Main.hs
+  build-depends:
+      base
+    , sarsi                 == 0.0.3.0
+    , machines
+    , machines-io
+    , machines-process
+    , process
+    , text
+    , fsnotify              >= 0.2        && < 0.3
+  hs-source-dirs:       sarsi-elm
+  ghc-options:          -Wall -dynamic -threaded
+  default-language:     Haskell2010
+
 executable sarsi-nvim
   main-is:              Main.hs
   other-modules:
