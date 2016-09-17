@@ -21,6 +21,7 @@ library
   exposed-modules:
     Codec.Sarsi
     Codec.Sarsi.GHC
+    Codec.Sarsi.ELM
     Codec.Sarsi.SBT
     Codec.Sarsi.SBT.Machine
     Sarsi
