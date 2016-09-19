@@ -12,7 +12,6 @@ import System.IO.Machine (sinkIO)
 
 import qualified Data.List as List
 import qualified Data.Text as Text
-import qualified Data.Vector as Vector
 import qualified Sarsi as Sarsi
 
 -- TODO Remove the MVar by impl. scanM ((a -> b -> m a) -> a -> ProcessT m (k b) a) in machines
@@ -25,7 +24,7 @@ toVi :: Message -> Text
 toVi (Message (Location fp col ln) lvl txts) = Text.concat [header, pack " ", body]
   where
     header  = Text.concat $ List.intersperse (pack ":") [fp, pack $ show  ln, pack $ show  col, tpe lvl]
-    body    = Text.concat $ List.intersperse (pack " ") $ Vector.toList txts
+    body    = Text.concat $ List.intersperse (pack " ") txts
     tpe Error = pack "e"
     tpe Warning = pack "w"
 

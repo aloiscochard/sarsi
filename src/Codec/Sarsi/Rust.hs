@@ -4,7 +4,6 @@ module Codec.Sarsi.Rust where
 import Codec.Sarsi (Level(..), Location(..), Message(..))
 
 import Data.Attoparsec.Text
-import qualified Data.Vector as Vector
 
 messageParser :: Parser Message
 messageParser = do
@@ -17,7 +16,7 @@ messageParser = do
     [ string "warning: " *> return Warning
     , string "error: " *> return Error ]
   txt <- untilLineBreak <* ("\n" <* end)
-  return $ Message (Location fp c n) l $ Vector.singleton txt
+  return $ Message (Location fp c n) l [txt]
   where
     untilSep   = takeWhile1 $ \w -> w /= sepChar
     untilSpace = takeWhile1 $ \w -> w /= ' '

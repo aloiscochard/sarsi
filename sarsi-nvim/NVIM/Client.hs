@@ -7,12 +7,11 @@ import Data.Binary.Put (runPut)
 import Data.ByteString (hGetSome, hPut)
 import Data.ByteString.Lazy (toStrict)
 import Data.Machine ((<~), asParts, auto, final, run, source)
-import Data.MessagePack.Object (Object(..), toObject)
+import Data.MessagePack.Object (Object(..))
 import Data.MessagePack.RPC (Answer(..), Request(..), Message(..), getMessage, putRequest)
 import Data.Text (Text)
 import System.IO (Handle, stdin, stdout)
 import qualified Data.Text as Text
-import qualified Data.Vector as Vector
 
 data Command = VimCommand [Object] | VimCallFunction Text [Object]
 
@@ -29,10 +28,8 @@ runCommandWith hIn hOut cmd = do
       mkAnswer [a] = a
       mkAnswer _   = Error $ ObjectStr $ Text.pack "No RPC answer received."
       mkRequest (VimCommand xs) =
-        Request 0 (Text.pack "vim_command") $ Vector.fromList xs
+        Request 0 (Text.pack "vim_command") xs
       mkRequest (VimCallFunction m xs) =
-        Request 0 (Text.pack "vim_call_function") $ Vector.fromList $
-          [ toObject m
-          , toObject $ Vector.fromList xs ]
+        Request 0 (Text.pack "vim_call_function") [ ObjectStr m, ObjectArray xs ]
       unpack (Right (Response _ a)) = [a]
       unpack _                      = []

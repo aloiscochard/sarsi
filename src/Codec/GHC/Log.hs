@@ -19,10 +19,16 @@ messageParser = do
   n   <- decimal <* char sepChar
   c   <- decimal <* char sepChar
   l   <- choice
-    [ string " Warning:" *> return Warning
-    , return Error ]
+    [ choice
+      [ string " warning:" *> return Warning
+      , string " error:" *> return Error ]
+    -- Before GHC 8.0
+    , choice
+      [ string " Warning:" *> return Warning
+      , return Error ] ]
   txt <- choice
-    [ return <$> untilLineBreak <* ("\n" <* end)
+    [ (string " [" *> untilLineBreak <* "\n") *> (multilinesComment <* end)
+    , return <$> untilLineBreak <* ("\n" <* end)
     , takeLineBreak *> (multilinesComment <* end) ]
   return $ Message fp (Pos c n) l txt
   where

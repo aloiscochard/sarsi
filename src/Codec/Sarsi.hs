@@ -1,17 +1,16 @@
 module Codec.Sarsi where
 
+import Data.Int (Int64)
 import Data.Text (Text, unpack)
 import Data.Binary (Get, Put)
-import Data.Vector (Vector)
 
 import qualified Data.MessagePack.Get as Get
 import qualified Data.MessagePack.Put as Put
 import qualified Data.Text as Text
-import qualified Data.Vector as Vector
 
 data Event
   = Start { label :: Text }
-  | Finish { errors :: Int, warnings :: Int }
+  | Finish { errors :: Int64, warnings :: Int64 }
   | Notify { message :: Message }
 
 instance Show Event where
@@ -36,11 +35,11 @@ putEvent (Start t) = Put.putInt 0 *> Put.putStr t
 putEvent (Finish es ws) = Put.putInt 1 *> Put.putInt es *> Put.putInt ws
 putEvent (Notify m) = Put.putInt 2 *> putMessage m
 
-data Message = Message Location Level (Vector Text)
+data Message = Message Location Level [Text]
 
 instance Show Message where
   show (Message loc lvl txts) =
-    (concat [show loc, " ", show lvl, "\n"]) ++ (unlines $ Text.unpack <$> Vector.toList txts)
+    (concat [show loc, " ", show lvl, "\n"]) ++ (unlines $ Text.unpack <$> txts)
 
 getMessage :: Get Message
 getMessage = Message <$> getLocation <*> getLevel <*> Get.getArray Get.getStr
@@ -48,7 +47,7 @@ getMessage = Message <$> getLocation <*> getLevel <*> Get.getArray Get.getStr
 putMessage :: Message -> Put
 putMessage (Message loc lvl txt) = putLocation loc *> putLevel lvl *> Put.putArray Put.putStr txt
 
-data Location = Location { filePath :: Text, column :: Int, line :: Int }
+data Location = Location { filePath :: Text, column :: Int64, line :: Int64 }
 
 instance Show Location where
   show (Location fp c l) = concat [Text.unpack fp, "@", show l, ":", show c]
@@ -63,8 +62,8 @@ data Level = Warning | Error
   deriving (Enum, Show)
 
 getLevel :: Get Level
-getLevel = fmap toEnum Get.getInt
+getLevel = fmap (toEnum . fromIntegral) Get.getInt
 
 putLevel :: Level -> Put
-putLevel = Put.putInt . fromEnum
+putLevel = Put.putInt . fromIntegral . fromEnum
 
