@@ -74,10 +74,6 @@ executable sarsi-hs
       base
     , sarsi                 == 0.0.3.0
     , machines
-    , machines-io
-    , machines-process
-    , process
-    , text
   hs-source-dirs:       sarsi-hs
   ghc-options:          -Wall -dynamic -threaded
   default-language:     Haskell2010
