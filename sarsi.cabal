@@ -21,12 +21,13 @@ library
   exposed-modules:
     Codec.Sarsi
     Codec.Sarsi.GHC
+    Codec.Sarsi.Rust
     Codec.Sarsi.SBT
     Codec.Sarsi.SBT.Machine
-    Codec.Sarsi.Rust
     Sarsi
     Sarsi.Consumer
     Sarsi.Producer
+    Sarsi.Tools.Shell
     Sarsi.Trace
     -- TODO Extract in a `codec-ghc-log` module
     Codec.GHC.Log
