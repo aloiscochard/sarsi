@@ -60,11 +60,17 @@ It basically means you have to start consumers/producers from the same directory
 
 ## Producers
 
+**Generic**
+It does allow you to run an arbitrary command and get it's output transparently feeded into all active consumers.
+
+**Tailored**
+It is specialized for an interactive command and will forward the arguments you pass to that specific program.
+
 ### Haskell
 
-The `sarsi-hs` command line wrapper allow you to run an arbitrary command and get it's output transparently feeded into all active consumers.
+The `sarsi-hs` command line wrapper is **generic** and can be used with `ghc`/`cabal`/`stack`.
 
-	sarsi-hs stack build
+	sarsi-hs cabal build
 
 It works nicely with [entr](http://entrproject.org/), `inotifywait`, or any other hook mechanism you would like to use.
 
@@ -74,9 +80,23 @@ while sleep 1; do
 done;
 ```
 
+### Rust
+
+The `sarsi-rs` command line wrapper is **generic** and can be used with `rustc`/`cargo`.
+
+	sarsi-rs rustc foo.rs
+
+It works nicely with [entr](http://entrproject.org/), `inotifywait`, or any other hook mechanism you would like to use.
+
+```shell
+while sleep 1; do 
+  find . ! -path "./target/*" | grep '.rs\|.toml' | entr -cdr sarsi-rs cargo build;
+done;
+```
+
 ### Scala
 
-You can simply use it in place of your `sbt` command, interactively or not (you should surely prefer the former for performance reasons).
+You can simply use this **tailored** wrapper in place of your `sbt` command, interactively or not (you should surely prefer the former for performance reasons).
 
 	sarsi-sbt
 
