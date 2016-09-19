@@ -7,11 +7,15 @@ import System.IO (Handle)
 import System.IO.Machine (byLine, printer, sourceHandle)
 
 import qualified Codec.GHC.Log as GHC
+import qualified Codec.Sarsi.Rust as Rust
 import qualified Codec.Sarsi.SBT as SBT
 import qualified Data.Text as Text
 
 traceHS :: Handle -> IO ()
 traceHS = traceParser GHC.messageParser
+
+traceRS :: Handle -> IO ()
+traceRS = traceParser Rust.messageParser
 
 traceSBT :: Handle -> IO ()
 traceSBT = traceParser SBT.eventParser

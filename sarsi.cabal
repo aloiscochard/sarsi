@@ -23,6 +23,7 @@ library
     Codec.Sarsi.GHC
     Codec.Sarsi.SBT
     Codec.Sarsi.SBT.Machine
+    Codec.Sarsi.Rust
     Sarsi
     Sarsi.Consumer
     Sarsi.Producer
