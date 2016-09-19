@@ -22,6 +22,9 @@ echom str = VimCommand [toObject $ concat ["echom \"", title, ": ", str, "\""]]
 setqflist :: String -> [Object] -> Command
 setqflist action items = VimCallFunction (Text.pack "setqflist") [toObject items, toObject action]
 
+setqflistEmpty :: Command
+setqflistEmpty = setqflist "r" []
+
 -- TODO Sanitize text description by escaping special characters
 mkQuickFix :: Message -> Object
 mkQuickFix (Message (Location fp col ln) lvl txts) = toObject . Map.fromList $
@@ -34,12 +37,12 @@ mkQuickFix (Message (Location fp col ln) lvl txts) = toObject . Map.fromList $
       tpe Error   = "E"
       tpe Warning = "W"
 
-convert :: Bool -> Event -> (Bool, [Command])
-convert _ e@(Start _)     = (True, [echom $ show e])
-convert _ e@(Finish _ _)  = (True, [echom $ show e])
-convert first (Notify msg@(Message loc lvl _))  = (False, xs) where
+convert :: Int -> Event -> (Int, [Command])
+convert _ e@(Start _)     = (0, [echom $ show e])
+convert i e@(Finish _ _)  = (0, (echom $ show e) : (if i == 0 then [setqflistEmpty] else []))
+convert i (Notify msg@(Message loc lvl _))  = (i + 1, xs) where
   xs =
-    [ setqflist (if first then "r" else "a") [mkQuickFix msg]
+    [ setqflist (if i == 0 then "r" else "a") [mkQuickFix msg]
     , echo $ concat [show loc, " ", show lvl] ]
 
 main :: IO ()
@@ -50,12 +53,12 @@ main = do
   t     <- getTopic b "."
   consumeOrWait t consumer
     where
-      consumer Nothing  src = consumer (Just True) src
-      consumer (Just b) src = do
-        b' <- runT $ final <~ sinkPart_ id (sinkIO publish <~ asParts) <~ converter b <~ src
-        return (Left $ head b')
-      converter :: Bool -> ProcessT IO Event (Bool, [Command])
-      converter b = scan f (b, []) where f (first, _) event = convert first event
+      consumer Nothing  src = consumer (Just 0) src
+      consumer (Just i) src = do
+        i' <- runT $ final <~ sinkPart_ id (sinkIO publish <~ asParts) <~ converter i <~ src
+        return (Left $ head i')
+      converter :: Int -> ProcessT IO Event (Int, [Command])
+      converter i = scan f (i, []) where f (first, _) event = convert first event
       publish cmd = do
         _ <- runCommand cmd
         return ()
