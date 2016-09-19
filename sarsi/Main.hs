@@ -2,7 +2,7 @@ module Main where
 
 import Distribution.Text
 import Sarsi (getBroker, getSockAddr, getTopic, title)
-import Sarsi.Trace (traceHS, traceRS, traceSBT)
+import Sarsi.Tools.Trace (traceHS, traceRS, traceSBT)
 import System.IO (stdin)
 import System.Environment (getArgs)
 

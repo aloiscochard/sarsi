@@ -1,4 +1,4 @@
-module Sarsi.Trace where
+module Sarsi.Tools.Trace where
 
 import Data.Machine ((<~), auto, runT_)
 import Data.Attoparsec.Text (Parser)

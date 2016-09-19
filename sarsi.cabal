@@ -28,7 +28,7 @@ library
     Sarsi.Consumer
     Sarsi.Producer
     Sarsi.Tools.Shell
-    Sarsi.Trace
+    Sarsi.Tools.Trace
     -- TODO Extract in a `codec-ghc-log` module
     Codec.GHC.Log
     -- TODO Extract in a `machines-attoparsec` module
