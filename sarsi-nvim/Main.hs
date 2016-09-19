@@ -2,7 +2,7 @@ module Main where
 
 import Codec.Sarsi (Event(..), Level(..), Location(..), Message(..))
 import Data.Machine (ProcessT, (<~), asParts, final, scan, sinkPart_, runT)
-import Data.MessagePack.Object (Object(..), toObject)
+import Data.MessagePack.Object (Object(..))
 import NVIM.Client (Command(..), runCommand)
 import Sarsi (getBroker, getTopic, title)
 import Sarsi.Consumer (consumeOrWait)
@@ -10,29 +10,27 @@ import System.IO (BufferMode(NoBuffering), hSetBuffering, stdin, stdout)
 import System.IO.Machine (sinkIO)
 
 import qualified Data.Text as Text
-import qualified Data.Map as Map
-import qualified Data.Vector as Vector
 
 echo :: String -> Command
-echo str = VimCommand [toObject $ concat ["echo \"", str, "\""]]
+echo str = VimCommand [ObjectStr . Text.pack $ concat ["echo \"", str, "\""]]
 
 echom :: String -> Command
-echom str = VimCommand [toObject $ concat ["echom \"", title, ": ", str, "\""]]
+echom str = VimCommand [ObjectStr . Text.pack $ concat ["echom \"", title, ": ", str, "\""]]
 
 setqflist :: String -> [Object] -> Command
-setqflist action items = VimCallFunction (Text.pack "setqflist") [toObject items, toObject action]
+setqflist action items = VimCallFunction (Text.pack "setqflist") [ObjectArray items, ObjectStr $ Text.pack action]
 
 setqflistEmpty :: Command
 setqflistEmpty = setqflist "r" []
 
 -- TODO Sanitize text description by escaping special characters
 mkQuickFix :: Message -> Object
-mkQuickFix (Message (Location fp col ln) lvl txts) = toObject . Map.fromList $
-  [ ("filename", toObject fp)
-  , ("lnum", ObjectInt ln)
-  , ("col", ObjectInt col)
-  , ("type", toObject $ tpe lvl)
-  , ("text", toObject $ Text.unlines $ Vector.toList txts) ]
+mkQuickFix (Message (Location fp col ln) lvl txts) = ObjectMap $
+  [ (ObjectStr $ Text.pack "filename", ObjectStr fp)
+  , (ObjectStr $ Text.pack "lnum", ObjectInt ln)
+  , (ObjectStr $ Text.pack "col", ObjectInt col)
+  , (ObjectStr $ Text.pack "type", ObjectStr . Text.pack $ tpe lvl)
+  , (ObjectStr $ Text.pack "text", ObjectStr $ Text.unlines txts) ]
     where
       tpe Error   = "E"
       tpe Warning = "W"

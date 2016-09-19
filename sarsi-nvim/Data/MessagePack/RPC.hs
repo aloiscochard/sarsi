@@ -1,33 +1,32 @@
 module Data.MessagePack.RPC where
 
 import Data.Binary (Get, Put, get, getWord8, put)
+import Data.Int (Int64)
 import Data.MessagePack (Object(..))
 import Data.Text (Text)
-import Data.Vector (Vector)
 
 import qualified Data.MessagePack as MP
-import qualified Data.Vector as Vector
 
 data Answer = Success Object | Error Object
   deriving Show
 
 data Request = Request
-  { requestMessageID  :: Int
+  { requestMessageID  :: Int64
   , requestMethod     :: Text
-  , requestParams     :: Vector Object }
+  , requestParams     :: [Object] }
   deriving Show
 
 putRequest :: Request -> Put
 putRequest (Request msgID method params) =
-  MP.putArray id $ Vector.fromList $ [MP.putInt 0, MP.putInt msgID, MP.putStr method, MP.putArray put params]
+  MP.putArray id [MP.putInt 0, MP.putInt msgID, MP.putStr method, MP.putArray put params]
 
 data Message
   = Response
-    { responseMessageID :: Int
+    { responseMessageID :: Int64
     , responseAnswer    :: Answer }
   | Notification
     { notificationMethod :: Text
-    , notificationParams :: Vector Object }
+    , notificationParams :: [Object] }
   deriving Show
 
 getMessage :: Get Message

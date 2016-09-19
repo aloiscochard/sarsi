@@ -3,6 +3,7 @@ module Codec.Sarsi.SBT.Machine where
 import Codec.Sarsi (Event(..), Message(..), Level(..))
 import Codec.Sarsi.SBT (SBTEvent(..), eventParser, cleanEC, untilLineBreak, end)
 import Data.Attoparsec.Text.Machine (processParser, streamParser)
+import Data.Int (Int64)
 import Data.Machine (ProcessT, (<~), asParts, auto, scan)
 import Data.Text (Text)
 
@@ -29,7 +30,7 @@ eventProcess' = asParts <~ auto unpackEvent <~ streamParser eventParser <~ prepr
     unpackLine (Left _)     = []
 
 
-data Session = Session { isBuilding :: Bool, counts :: (Int, Int) }
+data Session = Session { isBuilding :: Bool, counts :: (Int64, Int64) }
   deriving Show
 
 emptySession :: Session

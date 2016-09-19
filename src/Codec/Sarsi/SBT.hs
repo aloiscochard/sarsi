@@ -8,7 +8,6 @@ import Data.Text (Text)
 
 import qualified Data.Attoparsec.Text as AttoText
 import qualified Data.Text as Text
-import qualified Data.Vector as Vector
 
 data SBTEvent = CompileStart Text | TaskFinish Bool Text | Throw Message
   deriving Show
@@ -36,13 +35,13 @@ messageParser = do
   ts  <- manyTill' (lineStart *> (untilLineBreak <* "\n")) (lookAhead $ column')
   col <- column'
   _   <- end
-  return $ Message (Location fp (col) ln) lvl $ formatTxts t ts
+  return $ Message (Location fp (fromIntegral col) ln) lvl $ formatTxts t ts
     where
       level = choice [string "[error]" *> return Error, string "[warn]" *> return Warning]
       lineStart = level <* space
       sepChar = ':'
-      formatTxts t [] = Vector.singleton t
-      formatTxts t ts = Vector.fromList $ t : init ts
+      formatTxts t [] = [t]
+      formatTxts t ts = t : init ts
       column' = level *> ((length <$> many1 space) <* "^\n")
 
 cleanEC :: Parser Text
