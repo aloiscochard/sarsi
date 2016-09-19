@@ -2,13 +2,8 @@ flags: {}
 packages:
 - '.'
 extra-deps:
-- adjunctions-4.2.2
-- base-orphans-0.5.3
-- distributive-0.4.4
-- machines-0.6
-- machines-binary-0.3.0.2
-- machines-process-0.2.0.6
-- machines-io-0.2.0.12
-- msgpack-1.0.0
-- text-1.2.2.0
-resolver: lts-5.5
+- data-msgpack-0.0.3
+- machines-binary-0.3.0.3
+- machines-process-0.2.0.8
+- machines-io-0.2.0.13
+resolver: nightly-2016-09-19
