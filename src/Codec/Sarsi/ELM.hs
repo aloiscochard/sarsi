@@ -13,9 +13,9 @@ fromELMLog (Log.Message tag overview details region subRegion file level) =
   let col = Log.column . Log.start $ fromMaybe region subRegion
       row = Log.line . Log.start $ fromMaybe region subRegion
   in Message
-       (Location (pack file) col row)
+       (Location (pack file) (fromIntegral col) (fromIntegral row))
        (fromELMLevel level)
-       (Vector.fromList [(Text.concat [pack tag, pack ": ", pack overview, pack " ", pack details])])
+       ([(Text.concat [pack tag, pack ": ", pack overview, pack " ", pack details])])
 
 fromELMLevel :: String -> Level
 fromELMLevel txt = if txt == "warning" then Warning else Error
