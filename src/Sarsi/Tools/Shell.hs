@@ -1,16 +1,16 @@
 module Sarsi.Tools.Shell where
 
 import Codec.Sarsi (Event(..), Level(..), Message(..))
-import Data.Machine (ProcessT, (<~), auto, autoM, prepended, runT_, source)
+import Data.Machine (ProcessT, Is, (<~), auto, autoM, prepended, runT, runT_, source, wye, repeatedly, awaits, yield, Y(Z))
 import Data.List (foldl')
 import Data.Text (Text)
 import Sarsi (getBroker, getTopic)
 import Sarsi.Producer (produce)
 import System.Environment (getArgs)
-import System.IO (stderr)
+import System.IO (stderr, stdout)
 import System.IO.Machine (byLine)
-import System.Process (StdStream(..), shell, std_in, std_err)
-import System.Process.Machine (callProcessMachines, mStdErr)
+import System.Process (StdStream(..), shell, std_in, std_err, std_out)
+import System.Process.Machine (ProcessMachines, callProcessMachines)
 import System.Exit (ExitCode, exitWith)
 
 import qualified Data.List as List
@@ -18,14 +18,23 @@ import qualified Data.Text as Text
 import qualified Data.Text.IO as TextIO
 import qualified Sarsi as Sarsi
 
--- TODO Use Wee/Tee to merge stdout/stderr (keep echoText splitted).
+-- TODO Contribute to machine-process (as alt to mStdErr, mStdOut)
+mStdOutputs :: ProcessT IO (Either a a) b -> ProcessMachines a a0 (Is a0) -> IO [b]
+mStdOutputs mp (_, Just stdOut, Just stdErr)  = runT $ mp <~ wye stdErr stdOut slurp where
+  slurp = repeatedly $ do
+    res <- awaits Z
+    yield res
+mStdOutputs _  _                              = return []
+
 callShell :: String -> ProcessT IO Text Message -> ProcessT IO Message a -> IO (ExitCode, [a])
-callShell cmd parser sink = callProcessMachines byLine createProc (mStdErr pipeline)
+callShell cmd parser sink = callProcessMachines byLine createProc (mStdOutputs pipeline)
   where
-    pipeline = sink <~ parser <~ echoText stderr <~ appendCR
-    echoText h = autoM $ (\txt -> TextIO.hPutStr h txt >> return txt)
-    createProc  = (shell cmd) { std_in = Inherit, std_err = CreatePipe }
-    appendCR = auto $ (`Text.snoc` '\n')
+    pipeline    = sink <~ parser <~ appendCR <~ echo
+    echo        = autoM $ \res -> case res of
+      Left  txt -> TextIO.hPutStrLn stderr txt >> return txt
+      Right txt -> TextIO.hPutStrLn stdout txt >> return txt
+    createProc  = (shell cmd) { std_in = Inherit, std_err = CreatePipe, std_out = CreatePipe }
+    appendCR    = auto $ (`Text.snoc` '\n')
 
 producer :: String -> String -> ProcessT IO Text Message -> ProcessT IO Event Event -> IO ExitCode
 producer lbl cmd parser sink = do
