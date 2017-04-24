@@ -24,7 +24,7 @@ messageParser = choice [formatA, formatB] where
         [ string "warning"  *> untilSep0 *> string ": " *> return Warning
         , string "error"    *> untilSep0 *> string ": " *> return Error   ]
       txt <- untilLineBreak <* "\n"
-      fp  <- "   --> " *> untilSep <* char sepChar
+      fp  <- many1 space *> "--> " *> untilSep <* char sepChar
       n   <- decimal <* char sepChar
       c   <- decimal <* end
       return $ Message (Location fp c n) l [txt]
