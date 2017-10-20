@@ -6,4 +6,5 @@ extra-deps:
 - machines-binary-0.3.0.3
 - machines-process-0.2.0.8
 - machines-io-0.2.0.13
-resolver: nightly-2016-09-19
+# resolver: nightly-2016-09-19
+resolver: lts-9.8
