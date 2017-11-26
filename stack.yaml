@@ -1,10 +1,7 @@
-flags: {}
+resolver: lts-9.14
 packages:
-- '.'
-extra-deps:
-- data-msgpack-0.0.3
-- machines-binary-0.3.0.3
-- machines-process-0.2.0.8
-- machines-io-0.2.0.13
-# resolver: nightly-2016-09-19
-resolver: lts-9.8
+- .
+extra-deps: 
+  - data-msgpack-0.0.8
+flags: {}
+extra-package-dbs: []
