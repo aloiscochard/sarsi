@@ -109,7 +109,7 @@ It will behind the scene call the `sbt` program available in the path and transp
 
 Once `sarsi` installed, simply add the following line in your `init.vim`.
 
-	call rpcstart('sarsi-nvim') 
+  call jobstart(['sarsi-nvim'], {'rpc': v:true})
 
 You'll see build updates directly in the editor and the default quickfix list will be updated asynchronously.
 

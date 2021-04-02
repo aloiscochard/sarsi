@@ -1,28 +1,28 @@
 module Data.MessagePack.RPC where
 
 import Data.Binary (Get, Put, get, getWord8, put)
-import Data.Int (Int64)
 import Data.MessagePack (Object(..))
 import Data.Text (Text)
 
 import qualified Data.MessagePack as MP
+import qualified Data.Vector as Vector
 
 data Answer = Success Object | Error Object
   deriving Show
 
 data Request = Request
-  { requestMessageID  :: Int64
+  { requestMessageID  :: Int
   , requestMethod     :: Text
   , requestParams     :: [Object] }
   deriving Show
 
 putRequest :: Request -> Put
 putRequest (Request msgID method params) =
-  MP.putArray id [MP.putInt 0, MP.putInt msgID, MP.putStr method, MP.putArray put params]
+  MP.putArray id $ Vector.fromList [MP.putInt 0, MP.putInt msgID, MP.putStr method, MP.putArray put $ Vector.fromList params]
 
 data Message
   = Response
-    { responseMessageID :: Int64
+    { responseMessageID :: Int
     , responseAnswer    :: Answer }
   | Notification
     { notificationMethod :: Text
@@ -45,5 +45,5 @@ getMessage = do
     2 -> do
       method <- MP.getStr
       (ObjectArray params) <- get
-      return $ Notification method params
+      return $ Notification method (Vector.toList params)
     _ -> fail "unsupported message type"

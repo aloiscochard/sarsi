@@ -36,23 +36,23 @@ library
     Data.Attoparsec.Text.Machine
   build-depends:
       base                  >= 4.6.0.1    && < 5
-    , async                 >= 2.1        && < 2.2
+    , async                 >= 2.1        && < 2.3
     , attoparsec            >= 0.12       && < 0.14
     , binary                >= 0.7        && < 0.9
     , bytestring            >= 0.10       && < 0.11
-    , containers            >= 0.5        && < 0.6
-    , cryptonite            >= 0.10       && < 0.25
-    , data-msgpack          >= 0.0.3      && < 0.1
+    , containers            >= 0.5        && < 0.7
+    , cryptonite            >= 0.10       && < 0.29
+    , msgpack               >= 1.0        && < 1.1
     , directory             >= 1.2        && < 1.4
     , filepath              >= 1.4        && < 1.5
-    , fsnotify              >= 0.2        && < 0.3
-    , machines              >= 0.6        && < 0.7
-    , machines-binary       >= 0.3.0.2    && < 0.4
-    , machines-process      >= 0.2.0.6    && < 0.3
-    , machines-io           >= 0.2.0.12   && < 0.3
-    , network               >= 2.6        && < 2.7
-    , process               >= 1.1        && < 1.5
-    , stm                   >= 2.4        && < 2.5
+    , fsnotify              >= 0.2        && < 0.4
+    , machines              >= 0.7        && < 0.8
+    , machines-binary       >= 7.0        && < 7.1
+    , machines-process      >= 7.0        && < 7.1
+    , machines-io           >= 7.0        && < 7.1
+    , network               >= 3.1        && < 3.2
+    , process               >= 1.1        && < 1.7
+    , stm                   >= 2.4        && < 2.6
     , text                  >= 1.2        && < 1.3
     , vector                >= 0.10       && < 0.13
 
@@ -60,7 +60,7 @@ executable sarsi
   main-is:              Main.hs
   other-modules:
     Paths_sarsi
-  build-depends:       
+  build-depends:
       base
     , Cabal
     , sarsi                 == 0.0.4.0
@@ -97,7 +97,7 @@ executable sarsi-nvim
     , machines
     , machines-binary
     , machines-io
-    , data-msgpack
+    , msgpack
     , network
     , process
     , text

@@ -1,16 +1,16 @@
 module Codec.Sarsi where
 
-import Data.Int (Int64)
 import Data.Text (Text, unpack)
 import Data.Binary (Get, Put)
 
 import qualified Data.MessagePack.Get as Get
 import qualified Data.MessagePack.Put as Put
 import qualified Data.Text as Text
+import qualified Data.Vector as Vector
 
 data Event
   = Start { label :: Text }
-  | Finish { errors :: Int64, warnings :: Int64 }
+  | Finish { errors :: Int, warnings :: Int }
   | Notify { message :: Message }
 
 instance Show Event where
@@ -42,12 +42,12 @@ instance Show Message where
     (concat [show loc, " ", show lvl, "\n"]) ++ (unlines $ Text.unpack <$> txts)
 
 getMessage :: Get Message
-getMessage = Message <$> getLocation <*> getLevel <*> Get.getArray Get.getStr
+getMessage = Message <$> getLocation <*> getLevel <*> (Vector.toList <$> Get.getArray Get.getStr)
 
 putMessage :: Message -> Put
-putMessage (Message loc lvl txt) = putLocation loc *> putLevel lvl *> Put.putArray Put.putStr txt
+putMessage (Message loc lvl txt) = putLocation loc *> putLevel lvl *> Put.putArray Put.putStr (Vector.fromList txt)
 
-data Location = Location { filePath :: Text, column :: Int64, line :: Int64 }
+data Location = Location { filePath :: Text, column :: Int, line :: Int }
 
 instance Show Location where
   show (Location fp c l) = concat [Text.unpack fp, "@", show l, ":", show c]

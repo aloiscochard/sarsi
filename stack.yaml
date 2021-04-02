@@ -1,7 +1,10 @@
-resolver: lts-9.14
+resolver: lts-17.8
 packages:
 - .
-extra-deps: 
-  - data-msgpack-0.0.8
+extra-deps:
+- machines-binary-7.0.0.0
+- machines-io-7.0.0.0
+- machines-process-7.0.0.1
+- msgpack-1.0.1.0
 flags: {}
 extra-package-dbs: []
