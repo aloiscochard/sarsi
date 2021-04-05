@@ -4,7 +4,7 @@ packages:
 extra-deps:
 - machines-binary-7.0.0.0
 - machines-io-7.0.0.0
-- machines-process-7.0.0.1
+- machines-process-7.0.0.2
 - msgpack-1.0.1.0
 flags: {}
 extra-package-dbs: []

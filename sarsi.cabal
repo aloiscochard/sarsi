@@ -1,10 +1,8 @@
 name:                sarsi
 version:             0.0.4.0
 synopsis:            A universal quickfix toolkit and his protocol.
- 
 description:
   Usage overview can be found in the <http://github.com/aloiscochard/sarsi#sarsi README>.
-
 homepage:            http://github.com/aloiscochard/sarsi
 license:             Apache-2.0
 license-file:        LICENSE
@@ -21,15 +19,18 @@ library
   exposed-modules:
     Codec.Sarsi
     Codec.Sarsi.GHC
+    -- TODO Extract in rosetta
     Codec.Sarsi.Rust
     Codec.Sarsi.SBT
     Codec.Sarsi.SBT.Machine
+    Rosetta
     Sarsi
     Sarsi.Consumer
+    Sarsi.Processor
     Sarsi.Producer
-    Sarsi.Tools.Shell
+    Sarsi.Tools.Pipe
     Sarsi.Tools.Trace
-    -- TODO Extract in a `codec-ghc-log` module
+    -- TODO Extract in a `codec-ghc-log` module or in rosetta
     Codec.GHC.Log
     -- TODO Extract in a `machines-attoparsec` module
     Data.Attoparsec.Machine
@@ -48,7 +49,7 @@ library
     , fsnotify              >= 0.2        && < 0.4
     , machines              >= 0.7        && < 0.8
     , machines-binary       >= 7.0        && < 7.1
-    , machines-process      >= 7.0        && < 7.1
+    , machines-process      >= 7.0.0.2    && < 7.1
     , machines-io           >= 7.0        && < 7.1
     , network               >= 3.1        && < 3.2
     , process               >= 1.1        && < 1.7
@@ -62,20 +63,11 @@ executable sarsi
     Paths_sarsi
   build-depends:
       base
+    , sarsi
     , Cabal
-    , sarsi                 == 0.0.4.0
+    , containers
   hs-source-dirs:       sarsi
   ghc-options:          -Wall -threaded
-  default-language:     Haskell2010
-
-executable sarsi-hs
-  main-is:              Main.hs
-  build-depends:       
-      base
-    , sarsi                 == 0.0.4.0
-    , machines
-  hs-source-dirs:       sarsi-hs
-  ghc-options:          -Wall -dynamic -threaded
   default-language:     Haskell2010
 
 executable sarsi-nvim
@@ -87,9 +79,9 @@ executable sarsi-nvim
     -- TODO Extract in a lightweight nvim client.
     NVIM.Client
     -- NVIM.Info
-  build-depends:       
+  build-depends:
       base
-    , sarsi                 == 0.0.4.0
+    , sarsi
     , machines
     , binary
     , bytestring
@@ -107,22 +99,12 @@ executable sarsi-nvim
   ghc-options:          -Wall -dynamic -threaded
   default-language:     Haskell2010
 
-executable sarsi-rs
-  main-is:              Main.hs
-  build-depends:       
-      base
-    , sarsi                 == 0.0.4.0
-    , machines
-  hs-source-dirs:       sarsi-rs
-  ghc-options:          -Wall -dynamic -threaded
-  default-language:     Haskell2010
-
 executable sarsi-sbt
   main-is:              Main.hs
   other-modules:
-  build-depends:       
+  build-depends:
       base
-    , sarsi                 == 0.0.4.0
+    , sarsi
     , machines
     , machines-io
     , machines-process
@@ -134,9 +116,9 @@ executable sarsi-sbt
 
 executable sarsi-vi
   main-is:              Main.hs
-  build-depends:       
+  build-depends:
       base
-    , sarsi                 == 0.0.4.0
+    , sarsi
     , directory
     , filepath
     , machines
@@ -144,5 +126,20 @@ executable sarsi-vi
     , text
     , vector
   hs-source-dirs:       sarsi-vi
+  ghc-options:          -Wall -dynamic -threaded
+  default-language:     Haskell2010
+
+executable srs
+  main-is:              srs.hs
+  build-depends:
+      base
+    , sarsi
+    , async
+    , bytestring
+    , machines
+    , machines-io
+    , machines-process
+    , process
+  hs-source-dirs:       exe
   ghc-options:          -Wall -dynamic -threaded
   default-language:     Haskell2010
