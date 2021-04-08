@@ -82,6 +82,7 @@ executable sarsi-nvim
   build-depends:
       base
     , sarsi
+    , async
     , machines
     , binary
     , bytestring
@@ -93,6 +94,7 @@ executable sarsi-nvim
     , network
     , process
     , text
+    , stm
     , vector
     , unordered-containers  >= 0.2        && < 0.3
   hs-source-dirs:       sarsi-nvim

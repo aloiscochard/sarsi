@@ -1,11 +1,13 @@
 module Main where
 
+import Control.Concurrent.STM (atomically)
+import Control.Concurrent.STM.TBQueue (newTBQueue, writeTBQueue)
 import Codec.Sarsi (Event (..), Level (..), Location (..), Message (..))
 import Data.Machine (ProcessT, asParts, final, runT, scan, sinkPart_, (<~))
 import Data.MessagePack (Object (..))
 import qualified Data.Text as Text
 import qualified Data.Vector as Vector
-import NVIM.Client (Command (..), runCommand)
+import NVIM.Client (Command (..), mkConnection)
 import Sarsi (getBroker, getTopic, title)
 import Sarsi.Consumer (consumeOrWait)
 import System.IO (BufferMode (NoBuffering), hSetBuffering, stdin, stdout)
@@ -60,14 +62,15 @@ main = do
   hSetBuffering stdout NoBuffering
   b <- getBroker
   t <- getTopic b "."
-  consumeOrWait t consumer
+  qNotifs <- atomically $ newTBQueue 8
+  (wait, qCommands) <- mkConnection stdin stdout qNotifs
+  _ <- consumeOrWait t (consumer qCommands)
+  wait
   where
-    consumer Nothing src = consumer (Just 0) src
-    consumer (Just i) src = do
-      i' <- runT $ final <~ sinkPart_ id (sinkIO publish <~ asParts) <~ converter i <~ src
+    consumer q Nothing src = consumer q (Just 0) src
+    consumer q (Just i) src = do
+      i' <- runT $ final <~ sinkPart_ id (sinkIO (publish q) <~ asParts) <~ converter i <~ src
       return (Left $ head i')
     converter :: Int -> ProcessT IO Event (Int, [Command])
     converter i = scan f (i, []) where f (first, _) event = convert first event
-    publish cmd = do
-      _ <- runCommand cmd
-      return ()
+    publish q cmd = atomically $ writeTBQueue q (cmd, \_ -> return ())
