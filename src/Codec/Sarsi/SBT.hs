@@ -31,9 +31,10 @@ messageParser = do
   lvl <- lineStart
   fp  <- takeWhile1 (\c -> c /= sepChar && c /= '\n' && c /= '\r') <* char sepChar
   ln  <- decimal <* char sepChar
+  col <- decimal <* char sepChar
   t   <- space *> (untilLineBreak <* "\n")
   ts  <- manyTill' (lineStart *> (untilLineBreak <* "\n")) (lookAhead $ column')
-  col <- column'
+  _   <- column' -- ignored as it was parsed above
   _   <- end
   return $ Message (Location fp (fromIntegral col) ln) lvl $ formatTxts t ts
     where
