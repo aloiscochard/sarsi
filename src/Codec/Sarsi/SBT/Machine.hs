@@ -18,21 +18,15 @@ eventProcess = asParts <~ auto unpack <~ (scan f (emptySession, Nothing)) <~ eve
 eventProcess' :: Monad m => ProcessT m Text SBTEvent
 eventProcess' = asParts <~ auto unpackEvent <~ streamParser eventParser <~ preprocessing
   where
-    preprocessing =
-      filtered (not . Text.null)
-        <~ asParts
-        <~ auto unpackEC
-        <~ processParser cleaningCursesSBT
-        <~ asParts
-        <~ auto unpackEC
-        <~ processParser cleaningCurses
-        <~ auto unlined
-        <~ asLines
-    unlined txt = Text.snoc txt '\n'
+    preprocessing = filtered (not . Text.null) <~ parsing cleaningCursesSBT <~ parsing cleaningCurses <~ input
+      where
+        input = auto (\txt -> Text.snoc txt '\n') <~ asLines
+        parsing p = asParts <~ auto f <~ processParser p
+          where
+            f (Left _) = []
+            f (Right (_, txt)) = [txt]
     unpackEvent (Right e) = [e]
     unpackEvent (Left _) = []
-    unpackEC (Left _) = []
-    unpackEC (Right (_, txt)) = [txt]
 
 data Session = Session {isBuilding :: Bool, counts :: (Int, Int)}
   deriving (Show)
