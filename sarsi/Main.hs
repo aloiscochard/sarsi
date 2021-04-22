@@ -8,16 +8,18 @@ import qualified Rosetta as Rosetta
 import Sarsi (getBroker, getSockAddr, getTopic, title)
 import Sarsi.Processor (languageProcess, processAll, processAny)
 import Sarsi.Tools.Pipe (pipe)
-import Sarsi.Tools.Trace (traceHS, traceRS, traceSBT)
+import Sarsi.Tools.Trace (traceHS, traceRS, traceSBT, traceSBTCurses, traceCleanCurses)
 import System.Environment (getArgs)
 import System.IO (stdin)
 
 main :: IO ()
 main = getArgs >>= run
   where
+    run ["--trace", "clean-curses"] = traceCleanCurses stdin
     run ["--trace", "hs"] = traceHS stdin
     run ["--trace", "rs"] = traceRS stdin
     run ["--trace", "sbt"] = traceSBT stdin
+    run ["--trace", "sbt-curses"] = traceSBTCurses stdin
     run ["--topic"] = do
       b <- getBroker
       t <- getTopic b "."

@@ -18,6 +18,7 @@ library
   ghc-options:          -Wall
   exposed-modules:
     Codec.Sarsi
+    Codec.Sarsi.Curses
     Codec.Sarsi.GHC
     -- TODO Extract in rosetta
     Codec.Sarsi.Rust
@@ -78,7 +79,8 @@ executable sarsi-nvim
     Data.MessagePack.RPC
     -- TODO Extract in a lightweight nvim client.
     NVIM.Client
-    -- NVIM.Info
+    NVIM.Command
+    NVIM.QuickFix
   build-depends:
       base
     , sarsi
