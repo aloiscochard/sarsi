@@ -54,7 +54,8 @@ jumpTo :: Location -> [Command]
 jumpTo loc =
   (\x -> NvimCommand [ObjectStr . Text.pack $ x])
     <$> [ concat ["drop +", show $ line loc, " ", Text.unpack $ filePath loc],
-          concat ["call cursor(", show $ line loc, ", ", show $ column loc, ")"]
+          concat ["call cursor(", show $ line loc, ", ", show $ column loc, ")"],
+          "normal zz"
         ]
 
 openLogFile :: Topic -> IO Handle
