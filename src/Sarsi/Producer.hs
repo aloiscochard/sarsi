@@ -15,15 +15,31 @@ import Data.Machine (ProcessT, prepended, runT_, (<~))
 import Data.Machine.Process (takingJusts)
 import Network.Socket (Socket, accept, bind, close, listen, socketToHandle)
 import Sarsi (Topic, createSockAddr, createSocket, removeTopic, title)
+import System.Console.ANSI
 import System.IO (Handle, IOMode (WriteMode), hClose)
 import System.IO.Machine (byChunk, sinkHandle, sinkIO, sourceIO)
 
-createFinish :: [Event] -> Event
-createFinish xs = foldl' f empty xs
+finishPrint :: Int -> Int -> IO ()
+finishPrint e w = do
+  setSGR [SetColor Foreground Dull Blue]
+  putStr $ title
+  setSGR [Reset]
+  putStr $ ": "
+  setSGR (sgr e w)
+  putStrLn $ show event
+  setSGR [Reset]
   where
-    empty = Finish 0 0
-    f (Finish e w) (Notify (Message _ Warning _)) = Finish e (w + 1)
-    f (Finish e w) (Notify (Message _ Error _)) = Finish (e + 1) w
+    sgr 0 0 = [SetColor Foreground Dull Green]
+    sgr 0 _ = [SetColor Foreground Dull Yellow]
+    sgr _ _ = [SetColor Foreground Vivid Red]
+    event = Finish e w
+
+finishCreate :: [Event] -> (Int, Int)
+finishCreate xs = foldl' f empty xs
+  where
+    empty = (0, 0)
+    f (e, w) (Notify (Message _ Warning _)) = (e, (w + 1))
+    f (e, w) (Notify (Message _ Error _)) = ((e + 1), w)
     f finish _ = finish
 
 produce :: Topic -> (ProcessT IO Event Event -> IO a) -> IO a
@@ -35,10 +51,10 @@ produce t f = do
   feeder <- async $ f (sinkIO $ feed chan state)
   a <- wait feeder
   es <- readMVar state
-  let finish = createFinish es
-  putStrLn $ concat [title, ": ", show finish]
-  writeChan chan $ Just finish
+  let (errs, warns) = finishCreate es
+  writeChan chan $ Just $ Finish errs warns
   writeChan chan $ Nothing
+  finishPrint errs warns
   waitFinish conns
   cancel server
   removeTopic t
