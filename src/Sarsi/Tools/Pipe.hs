@@ -1,9 +1,11 @@
 module Sarsi.Tools.Pipe where
 
 import Codec.Sarsi (Event (..), Message (..))
+import Codec.Sarsi.Curses (cleanLine, cleaningCurses)
+import Data.Attoparsec.Text.Machine (processParser)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as ByteString
-import Data.Machine (MachineT, ProcessT, auto, autoM, prepended, runT_, (<~))
+import Data.Machine (MachineT, ProcessT, asParts, auto, autoM, prepended, runT_, (<~))
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Text.Encoding (decodeUtf8)
@@ -29,7 +31,10 @@ pipeFrom lbl process source = do
 
 producer :: String -> ProcessT IO Text Message -> MachineT IO k ByteString -> ProcessT IO Event Event -> IO ()
 producer lbl process source sink = do
-  runT_ $ pipeline <~ process <~ appendCR <~ auto decodeUtf8 <~ source
+  runT_ $ pipeline <~ process <~ cleaning <~ auto decodeUtf8 <~ source
   where
     pipeline = sink <~ prepended [Start $ Text.pack lbl] <~ auto Notify
-    appendCR = auto $ (`Text.snoc` '\n')
+    cleaning = asParts <~ auto unpack <~ processParser cleaningCurses <~ auto (\txt -> (cleanLine txt) `Text.snoc` '\n')
+      where
+        unpack (Right (_, txt)) = [txt]
+        unpack (Left _) = []

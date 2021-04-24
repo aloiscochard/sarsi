@@ -4,8 +4,15 @@ module Codec.Sarsi.Curses where
 
 import Data.Attoparsec.Text
 import qualified Data.Attoparsec.Text as AttoText
+import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as Text
+
+-- note: expect a line that does NOT ends with a LF
+cleanLine :: Text -> Text
+cleanLine txt | Text.null txt = txt
+cleanLine txt | Text.last txt == '\r' = fromMaybe Text.empty $ fst <$> Text.unsnoc txt
+cleanLine txt = txt
 
 -- Note: this parser remove CSI codes and do a best effort
 -- at removing "clear line" instructions while keeping
@@ -68,4 +75,3 @@ csiHeader = (satisfy (isEsc . fromEnum) <* char '[') >> return ()
 isEsc :: Int -> Bool
 isEsc 27 = True
 isEsc _ = False
-

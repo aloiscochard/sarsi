@@ -8,7 +8,7 @@ import qualified Rosetta as Rosetta
 import Sarsi (getBroker, getSockAddr, getTopic, title)
 import Sarsi.Processor (languageProcess, processAll, processAny)
 import Sarsi.Tools.Pipe (pipe)
-import Sarsi.Tools.Trace (traceHS, traceRS, traceSBT, traceSBTCurses, traceCleanCurses)
+import Sarsi.Tools.Trace (traceCleanCurses, traceHS, traceRS, traceSBT, traceSBTCurses)
 import System.Environment (getArgs)
 import System.IO (stdin)
 
