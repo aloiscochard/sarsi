@@ -1,5 +1,5 @@
 name:                sarsi
-version:             0.0.5.0
+version:             0.0.5.1
 synopsis:            A universal quickfix toolkit and his protocol.
 description:
   Usage overview can be found in the <http://github.com/aloiscochard/sarsi#sarsi README>.
