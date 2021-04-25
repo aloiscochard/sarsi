@@ -11,20 +11,24 @@ import qualified Data.Text as Text
 -- note: expect a line that does NOT ends with a LF
 cleanLine :: Text -> Text
 cleanLine txt | Text.null txt = txt
-cleanLine txt | Text.last txt == '\r' = fromMaybe Text.empty $ fst <$> Text.unsnoc txt
+cleanLine txt | Text.last txt == '\r' = fromMaybe Text.empty $ (f . fst) <$> Text.unsnoc txt
+  where
+    f x = case Text.breakOnAll "\r" x of
+      [] -> x
+      xs -> Text.tail $ (snd . last) xs
 cleanLine txt = txt
 
 -- Note: this parser remove CSI codes and do a best effort
 -- at removing "clear line" instructions while keeping
 -- all information exposed without any mangling.
 cleaningCurses :: Parser Text
-cleaningCurses = choice [multiples, single, (AttoText.takeWhile $ \w -> w /= '\n') <* "\n"]
+cleaningCurses = choice [multiples, single, none]
   where
     multiples = do
       before <- ln
       middle <- choice [silenceClearLines, silenceCSI]
       after <- choice [multiples, single]
-      return (Text.concat [before, "\n", middle, after])
+      return $ Text.concat [before, "\n", middle, after]
       where
         ln = do
           before <- AttoText.takeWhile (breakAt . fromEnum)
@@ -50,6 +54,10 @@ cleaningCurses = choice [multiples, single, (AttoText.takeWhile $ \w -> w /= '\n
           _ <- AttoText.takeWhile (not . isEsc . fromEnum)
           _ <- AttoText.many1 cl
           return Text.empty
+    none = do
+      ln <- (AttoText.takeWhile $ \w -> w /= '\n')
+      _ <- "\n"
+      return $ Text.concat [ln, "\n"]
     cl = csiHeader >> string "2K" >> return ()
     silenceCSI = do
       txt <- AttoText.takeWhile (not . isEsc . fromEnum)

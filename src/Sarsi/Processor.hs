@@ -5,11 +5,12 @@ import Codec.Sarsi (Message)
 import Codec.Sarsi.GHC (fromGHCLog)
 import qualified Codec.Sarsi.Rust as Rust
 import Data.Attoparsec.Text.Machine (streamParser)
-import Data.Machine (ProcessT, asParts, auto, flattened, (<~))
+import Data.Machine (ProcessT, asParts, auto, filtered, flattened, (<~))
 import Data.Machine.Fanout (fanout)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Rosetta (LanguageTag (..), ProjectTag, projectLanguages)
 
 data Processor = Processor {language :: LanguageTag, process :: ProcessT IO Text Message}
@@ -46,7 +47,7 @@ processHaskell = asParts <~ auto unpack <~ streamParser GHC.messageParser
     unpack (Left _) = []
 
 processRust :: ProcessT IO Text Message
-processRust = asParts <~ auto unpack <~ streamParser Rust.messageParser
+processRust = asParts <~ auto unpack <~ streamParser Rust.messageParser <~ filtered (not . Text.null)
   where
     unpack (Right msg) = [msg]
     unpack (Left _) = []
