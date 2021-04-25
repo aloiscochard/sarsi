@@ -1,38 +1,31 @@
-Sarsi
+sarsi
 =====
 
 [![View on hackage](https://img.shields.io/hackage/v/sarsi.svg)](http://hackage.haskell.org/package/sarsi)
 [![Join the chat at https://gitter.im/aloiscochard/sarsi](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/aloiscochard/sarsi)
 
-A universal quickfix toolkit and his protocol.
+A universal quickfix toolkit and its protocol.
 
 ### Quick fixing
 
-It's basically fixing inside your text editor/IDE the warnings or errors returned by the compiler.
-
-![https://media.giphy.com/media/3o6ozkwoL7wHOjer9C/giphy.gif](https://media.giphy.com/media/3o6ozkwoL7wHOjer9C/giphy.gif)
-
-*A sample session using `sarsi-hs` and `sarsi-nvim`.*
+It's fixing inside your text editor/IDE the warnings or errors returned by the compiler/interpreter.
 
 # Philosophy
 
-*[Sarsi](https://en.wiktionary.org/wiki/sarcio#Latin)* is at it's core a binary protocol to exchange quickfix messages, it approach the operating system as an integrated development environment, it's design follow the holy [Unix philosophy](https://en.wikipedia.org/wiki/Unix_philosophy) principles.
-
-On one side we produce messages from our favorite build tools, on the other we want them to be consumed as soon as possible by our favorite text editors.
-
-That's basically what `sarsi` is doing, and will always do, any other integration with  build tools/text editors should be designed separately.
+The core of *[sarsi](https://en.wiktionary.org/wiki/sarcio#Latin)* is a simple binary protocol to exchange quickfix messages. The tooling built around it approach the operating system as an integrated development environment following the [Unix philosophy](https://en.wikipedia.org/wiki/Unix_philosophy). On one side we produce messages from our build tools or interpreters, and on the other we want them to be consumed as soon as possible by our favorite text editors.
 
 # Modules
 
 #### Producers
 
- - `sarsi-hs` - Command line wrapper for Haskell tools (GHC/Cabal/[Stack](http://haskellstack.org/)/...)
- - `sarsi-sbt` - [SBT](http://www.scala-sbt.org/) specific wrapper for the Scala programming language
+ - `srs` - Command line wrapper for build tools (Rust, Haskell)
+ - `sarsi` - Generic utility processing stdin (all supported languages)
+ - `sarsi-sbt` - SBT specific wrapper for the Scala programming language
 
 #### Consumers
 
- - `sarsi-nvim` - [Neovim](https://neovim.io/) RPC client for realtime feedback
- - `sarsi-vi` - Quickfix file generator which use a vi compatible format
+ - `sarsi-nvim` - Neovim RPC plugin for realtime feedback and multilines error display
+ - `sarsi-vi` - Quickfix file generator which use a vi compatible error format
 
 # Install
 
@@ -40,102 +33,85 @@ That's basically what `sarsi` is doing, and will always do, any other integratio
 
 *Sarsi* is published on Hackage and can be installed using `cabal`.
 
-	cabal install sarsi
-
-This will install all the modules as well.
+    cabal install sarsi
 
 #### Source
 
 Alternatively, it can be installed from source using `stack`.
-	
-	git clone git@github.com:aloiscochard/sarsi.git
-	cd sarsi
-	stack install
+
+    git clone https://github.com/aloiscochard/sarsi.git
+    cd sarsi
+    stack install
 
 # Usage
 
 By default, when a consumer/producer start it will use a Unix pipe with a name generated according the directory in which it was launched.
 
-It basically means you have to start consumers/producers from the same directory for them to be connected.
+It means you have to start consumers/producers from the same directory for them to be connected.
 
 ## Producers
 
-**Generic**
+*Generic*
 It does allow you to run an arbitrary command and get it's output transparently feeded into all active consumers.
 
-**Tailored**
+*Tailored*
 It is specialized for an interactive command and will forward the arguments you pass to that specific program.
 
-### Haskell
+### Generic
 
-The `sarsi-hs` command line wrapper is **generic** and can be used with `ghc`/`cabal`/`stack`.
+Languages: Haskell (cabal, stack, ghc), Rust (cargo).
 
-	sarsi-hs cabal build
+#### srs
 
-It works nicely with [entr](http://entrproject.org/), `inotifywait`, or any other hook mechanism you would like to use.
+The `srs` command line wrapper is *generic* and can be used with any build tool.
 
-```
-while sleep 1; do 
-  find . ! -path "./.stack-work/*" | grep '.hs\|.cabal\|stack.yaml' | entr -cdr sarsi-hs stack build; 
-done;
-```
+    srs cabal build
 
-### Rust
+It works nicely with [velox](https://github.com/aloiscochard/velox/), [entr](http://entrproject.org/), `inotifywait`, or any other hook mechanism you would like to use to trigger the build automatically when the code change.
 
-The `sarsi-rs` command line wrapper is **generic** and can be used with `rustc`/`cargo`.
+    vlx srs cargo build
 
-	sarsi-rs rustc foo.rs
+#### sarsi
 
-It works nicely with [entr](http://entrproject.org/), `inotifywait`, or any other hook mechanism you would like to use.
+In some special case you might prefer using the command tool `sarsi` which process stdin and can be used in a pipeline.
 
-```shell
-while sleep 1; do 
-  find . ! -path "./target/*" | grep '.rs\|.toml' | entr -cdr sarsi-rs cargo build;
-done;
-```
+    cargo build |& sarsi
 
-### Scala
+### Tailored
 
-You can simply use this **tailored** wrapper in place of your `sbt` command, interactively or not (you should surely prefer the former for performance reasons).
+Languages: Scala (sbt).
 
-	sarsi-sbt
+#### Scala (SBT)
+
+You can use this *tailored* wrapper in place of your `sbt` command, interactively or not (you should surely prefer the former for performance reasons).
+
+    sarsi-sbt
 
 It will behind the scene call the `sbt` program available in the path and transparently forward the quick fixes produced to the available consumers.
 
 ## Consumers
 
-
 ### Neovim
 
-Once `sarsi` installed, simply add the following line in your `init.vim`.
+Once `sarsi` installed, add the following line in your `init.vim`.
 
-  call jobstart(['sarsi-nvim'], {'rpc': v:true})
+    let g:sarsi = jobstart(['sarsi-nvim'], {'rpc': v:true})
 
-You'll see build updates directly in the editor and the default quickfix list will be updated asynchronously.
+You might also want to add key bindings for the core functionatilites as shown below.
 
-Just use the usual `:cwindow` if you want to see the complete list of fixes or use `:cfirst`, `:cnext` and `:cprevious` to directly navigate between them.
+    noremap <silent> <C-F> :SarsiFocus<CR>
+    noremap <silent> <C-J> :SarsiNext<CR>
+    noremap <silent> <C-K> :SarsiPrevious<CR>
 
 ### Vi/Vim
 
-Due to the synchronous nature of `vi` you'll have to start the consumer in a dedicated terminal using the `sarsi-vi` command.
+First, you have to start the consumer in a dedicated terminal using the `sarsi-vi` command.
 
-The process will continuously maintain a quickfix file located at `$(sarsi).vi` which you can open in the editor using ```:cfile `sarsi`.vi```.
-
-You could then even keep `sarsi-vi` running in a one-line terminal, sitting at the bottom of your synchronous editor while pretending your are using `nvim` as similar status update are printed in real-time.
-
-```
-sarsi-vi: starting haskell build
-sarsi-vi: build success
-sarsi-vi: starting haskell build
-sarsi-vi: /../sarsi-vi/Main.hs@40:3 Error
-sarsi-vi: build failure with 1 error(s)
-sarsi-vi: starting haskell build
-sarsi-vi: build success
-```
+The process will continuously maintain a quickfix file located at `$(sarsi --topic).vi` which you can open in the editor using ```:cfile `sarsi`.vi```.
 
 #### Error fomat
 
-The output format used by `sarsi-vi` to generate the  `$(sarsi).vi` file is backward compatible with the default one used by `vi`/`vim`.
+The output format used by `sarsi-vi` to generate the  `$(sarsi --topic).vi` file is backward compatible with the default one used by `vi`/`vim`.
 
 The missing part is the level (warning/error), in order to have it taken into account you should add the following in your initialization script.
 
