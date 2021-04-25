@@ -21,13 +21,11 @@ import System.IO.Machine (byChunk, sinkHandle, sinkIO, sourceIO)
 
 finishPrint :: Int -> Int -> IO ()
 finishPrint e w = do
-  setSGR [SetColor Foreground Dull Blue]
+  setSGR (sgr e w)
   putStr $ title
   setSGR [Reset]
   putStr $ ": "
-  setSGR (sgr e w)
   putStrLn $ show event
-  setSGR [Reset]
   where
     sgr 0 0 = [SetColor Foreground Dull Green]
     sgr 0 _ = [SetColor Foreground Dull Yellow]
