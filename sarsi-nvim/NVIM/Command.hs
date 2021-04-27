@@ -11,6 +11,7 @@ import qualified Data.Vector as Vector
 data Command
   = NvimBufSetLines Object Int Int Bool [Text]
   | NvimCommand [Object]
+  | NvimCommandOutput [Object]
   | NvimCallFunction Text [Object]
   | NvimCreateBuf Bool Bool -- {listed} {scratch}
   | NvimOpenWin Object Bool Object
@@ -24,6 +25,8 @@ mkRequest msgId (NvimBufSetLines b s e strict xs) =
   Request msgId (Text.pack "nvim_buf_set_lines") [b, ObjectInt s, ObjectInt e, ObjectBool strict, ObjectArray (Vector.fromList (ObjectStr <$> xs))]
 mkRequest msgId (NvimCommand xs) =
   Request msgId (Text.pack "nvim_command") xs
+mkRequest msgId (NvimCommandOutput xs) =
+  Request msgId (Text.pack "nvim_command_output") xs
 mkRequest msgId (NvimCallFunction m xs) =
   Request msgId (Text.pack "nvim_call_function") [ObjectStr m, ObjectArray (Vector.fromList xs)]
 mkRequest msgId (NvimCreateBuf l s) =

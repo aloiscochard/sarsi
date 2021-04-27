@@ -99,9 +99,9 @@ Once `sarsi` installed, add the following line in your `init.vim`.
 
 You might also want to add key bindings for the core functionatilites as shown below.
 
-    noremap <silent> <C-F> :SarsiFocus<CR>
-    noremap <silent> <C-J> :SarsiNext<CR>
-    noremap <silent> <C-K> :SarsiPrevious<CR>
+    noremap <silent> <C-F> :cfirst<CR>
+    noremap <silent> <C-J> :cnext<CR>
+    noremap <silent> <C-K> :cprevious<CR>
 
 ### Vi/Vim
 

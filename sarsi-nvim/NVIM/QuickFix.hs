@@ -20,7 +20,7 @@ mkQuickFix (Message (Location fp col ln) lvl txts) =
           (ObjectStr $ Text.pack "lnum", ObjectInt ln),
           (ObjectStr $ Text.pack "col", ObjectInt col),
           (ObjectStr $ Text.pack "type", ObjectStr . Text.pack $ tpe lvl),
-          (ObjectStr $ Text.pack "text", ObjectStr $ Text.unlines txts)
+          (ObjectStr $ Text.pack "text", ObjectStr $ head txts)
         ]
     )
   where

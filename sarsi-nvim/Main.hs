@@ -44,6 +44,15 @@ data PluginState = PluginState
   }
   deriving (Show)
 
+locationLast :: PluginState -> Maybe Location
+locationLast s =
+  if Vector.null $ buildErrors s
+    then
+      if Vector.null $ buildWarnings s
+        then Nothing
+        else Just . fst $ Vector.last (buildWarnings s)
+    else Just . fst $ Vector.last (buildErrors s)
+
 echo :: String -> Command
 echo str = NvimCommand [ObjectStr . Text.pack $ concat ["echo \"", str, "\""]]
 
@@ -61,8 +70,19 @@ jumpTo loc =
 openLogFile :: Topic -> IO Handle
 openLogFile (Topic _ fp) = IO.openFile (concat [fp, "-nvim.log"]) WriteMode
 
-parseAction :: (Text, [Object]) -> PluginAction
-parseAction (m, _) = read $ Text.unpack m
+parseAction :: Maybe Handle -> (Text, [Object]) -> IO [PluginAction]
+parseAction _ (m, params) | m == method = return $ cmd =<< unpack =<< params
+  where
+    cmd (ObjectStr c) | Text.isPrefixOf c (Text.pack "cfirst") = [Focus]
+    cmd (ObjectStr c) | Text.isPrefixOf c (Text.pack "cnext") = [Next]
+    cmd (ObjectStr c) | Text.isPrefixOf c (Text.pack "cprevious") = [Previous]
+    cmd _ = []
+    method = Text.pack "CmdlineLeave"
+    unpack (ObjectArray xs) = Vector.toList xs
+    unpack _ = []
+parseAction hLog x = do
+  putLogLn hLog $ concat ["unsupported notification: ", show x]
+  return []
 
 parseArgs :: [String] -> Either String Bool
 parseArgs [] = Right False
@@ -75,12 +95,6 @@ pluginStateInit b = PluginState Done Vector.empty Vector.empty Nothing b Nothing
 putLogLn :: Maybe Handle -> String -> IO ()
 putLogLn Nothing _ = return ()
 putLogLn (Just h) s = IO.hPutStrLn h s >> IO.hFlush h
-
-registerActions :: [Command]
-registerActions =
-  (\x -> NvimCommand [ObjectStr . Text.pack $ concat ["command! Sarsi", x, " call rpcnotify(g:sarsi, '", x, "')"]])
-    <$> show
-    <$> pluginActions
 
 update :: Monoid a => Maybe Handle -> CommandQueue -> TVar PluginState -> Event -> IO a
 update h q s' e = do
@@ -96,7 +110,6 @@ update h q s' e = do
                 Building -> (Vector.null $ buildErrors s, s {buildStatus = Done})
                 _ -> (True, s {buildStatus = Done, buildErrors = Vector.empty, buildWarnings = Vector.empty})
             )
-      -- TODO Do auto-focus (only if users did not focus since Building)
       when emptyErrors $ windowClose q s'
     (Notify msg) ->
       updateState
@@ -140,7 +153,6 @@ nvim hLog q cmd = do
 nvim_ :: Maybe Handle -> CommandQueue -> Command -> IO ()
 nvim_ h q c = nvim h q c >> return ()
 
--- TODO NEW STUFF, move above
 -- TODO Important: could they all be into STM? how to avoid unnecessary readTVarIO?
 -- There must be a useful `Async + STM` atomic layer
 
@@ -191,11 +203,15 @@ bufferShow q s' height = do
 actionFocus :: Maybe Handle -> CommandQueue -> TVar PluginState -> Level -> Int -> IO ()
 actionFocus hLog q s' lvl rank = do
   s <- readTVarIO s'
+  active <- fixingIsActive hLog q s
   let (loc, txts) = focusContent lvl rank s
-  _ <- traverse (nvim_ hLog q) $ jumpTo loc
-  bufferSetLines q s' txts
-  bufferShow q s' $ length txts
-  return ()
+  if not active
+    then return ()
+    else do
+      _ <- traverse (nvim_ hLog q) $ jumpTo loc
+      bufferSetLines q s' txts
+      bufferShow q s' $ length txts
+      return ()
 
 actionMove :: Maybe Handle -> CommandQueue -> TVar PluginState -> (PluginState -> PluginState) -> IO ()
 actionMove hLog q s' f = do
@@ -208,6 +224,16 @@ actionMove hLog q s' f = do
   case fcs of
     Nothing -> return ()
     Just (lvl, rank) -> actionFocus hLog q s' lvl rank
+
+fixingIsActive :: Maybe Handle -> CommandQueue -> PluginState -> IO Bool
+fixingIsActive hLog q s = do
+  qfLast <- nvim hLog q $ NvimCommandOutput [ObjectStr . Text.pack $ "clist -1"]
+  case (qfLast, (locationString <$> (locationLast s))) of
+    (Just (ObjectStr ln), Just loc) -> return $ not (Text.null . snd $ Text.breakOn (Text.pack loc) ln)
+    _ -> return False
+  where
+    locationString :: Location -> String
+    locationString (Location fp c l) = concat [Text.unpack fp, ":", show l, " col ", show c]
 
 focusContent :: Level -> Int -> PluginState -> (Location, [Text])
 focusContent lvl rank s = Vector.unsafeIndex xs rank
@@ -256,12 +282,12 @@ main = do
       qCmds <- atomically $ newTBQueue 8
       qNotifs <- atomically $ newTBQueue 8
       connClose <- mkConnection IO.stdin IO.stdout qCmds qNotifs (errHandler hLog)
+      nvim_ hLog qCmds $ NvimCommand [ObjectStr . Text.pack $ "au CmdlineLeave * call rpcnotify(g:sarsi, 'CmdlineLeave', [getcmdline()])"]
       (Just buf) <- nvim hLog qCmds $ NvimCreateBuf False True
       state <- atomically $ newTVar $ pluginStateInit buf
       notifier <-
         async . runT_ $
-          autoM (notify hLog qCmds state) <~ (auto parseAction) <~ (sourceIO . atomically $ readTBQueue qNotifs)
-      _ <- traverse (nvim_ hLog qCmds) registerActions
+          autoM (notify hLog qCmds state) <~ asParts <~ (autoM $ parseAction hLog) <~ (sourceIO . atomically $ readTBQueue qNotifs)
       putLogLn hLog "ready"
       _ <- consumeOrWait t (consumer hLog state qCmds)
       cancel notifier
@@ -276,7 +302,7 @@ main = do
       case focus s of
         Nothing ->
           case focusDefault s of
-            Nothing -> nvim_ hLog q $ echom "nothing to fix"
+            Nothing -> return ()
             Just (lvl, rank) -> do
               atomically . modifyTVar' s' $ \x -> x {focus = Just (lvl, rank)}
               actionFocus hLog q s' lvl rank
