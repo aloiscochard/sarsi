@@ -211,6 +211,7 @@ actionFocus hLog q s' lvl rank = do
       _ <- traverse (nvim_ hLog q) $ jumpTo loc
       bufferSetLines q s' txts
       bufferShow q s' $ length txts
+      nvim_ hLog q $ echo $ concat [show lvl, ": ", show (rank + 1), "/", show . length $ messagesSelect s lvl]
       return ()
 
 actionMove :: Maybe Handle -> CommandQueue -> TVar PluginState -> (PluginState -> PluginState) -> IO ()
@@ -255,15 +256,18 @@ focusMove i s =
     Nothing -> s {focus = focusDefault s}
     Just (lvl, rank) -> s {focus = Just $ f lvl (rank + i)}
   where
-    f lvl rank | rank < 0 = f (toggle lvl) ((Vector.length $ select lvl) + rank)
-    f lvl rank | rank >= (Vector.length $ select lvl) = f (toggle lvl) (rank - (Vector.length $ select lvl))
+    f lvl rank | rank < 0 = f (toggle lvl) ((length $ select lvl) + rank)
+    f lvl rank | rank >= (length $ select lvl) = f (toggle lvl) (rank - (length $ select lvl))
     f lvl rank = (lvl, rank)
     toggle lvl | Vector.null $ select (toggle' lvl) = lvl
     toggle lvl = toggle' lvl
     toggle' Warning = Error
     toggle' Error = Warning
-    select Warning = buildWarnings s
-    select Error = buildErrors s
+    select = messagesSelect s
+
+messagesSelect :: PluginState -> Level -> Vector (Location, [Text])
+messagesSelect s Warning = buildWarnings s
+messagesSelect s Error = buildErrors s
 
 -- TODO How to make it shudown gracefully? currently it's probably killed by nvim while blocking in `consumerOrWait`
 main :: IO ()
