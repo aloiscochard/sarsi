@@ -107,7 +107,7 @@ You might also want to add key bindings for the core functionatilites as shown b
 
 First, you have to start the consumer in a dedicated terminal using the `sarsi-vi` command.
 
-The process will continuously maintain a quickfix file located at `$(sarsi --topic).vi` which you can open in the editor using ```:cfile `sarsi`.vi```.
+The process will continuously maintain a quickfix file located at `$(sarsi --topic).vi` which you can open in the editor using ```:cfile `sarsi --topic`.vi```.
 
 #### Error fomat
 
