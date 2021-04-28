@@ -65,6 +65,6 @@ main = do
   var <- newMVar Nothing
   consumeOrWait t $ consumer t var
   where
-    consumer (Topic _ tp) var first src = do
+    consumer (Topic _ tp _) var first src = do
       res <- runT $ final <~ sinkPart_ id ((sinkIO $ writer tp var) <~ asParts) <~ converter (maybe True id first) <~ src
       return $ Left $ head res

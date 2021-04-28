@@ -68,7 +68,7 @@ jumpTo loc =
         ]
 
 openLogFile :: Topic -> IO Handle
-openLogFile (Topic _ fp) = IO.openFile (concat [fp, "-nvim.log"]) WriteMode
+openLogFile (Topic _ fp _) = IO.openFile (concat [fp, "-nvim.log"]) WriteMode
 
 parseAction :: Maybe Handle -> (Text, [Object]) -> IO [PluginAction]
 parseAction _ (m, params) | m == method = return $ cmd =<< unpack =<< params

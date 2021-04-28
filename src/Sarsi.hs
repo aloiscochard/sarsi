@@ -12,7 +12,7 @@ title = "sarsi"
 
 newtype Broker = Broker FilePath
 
-data Topic = Topic Broker FilePath
+data Topic = Topic {broker :: Broker, topicPath :: FilePath, topicOrigin :: FilePath}
 
 getBroker :: IO Broker
 getBroker = do
@@ -24,20 +24,20 @@ getBroker = do
 getTopic :: Broker -> FilePath -> IO Topic
 getTopic b@(Broker bp) fp' = do
   fp <- makeAbsolute fp'
-  return $ Topic b $ bp </> (show $ (hash $ BSC8.pack fp :: Digest MD5))
+  return $ Topic b (bp </> (show $ (hash $ BSC8.pack fp :: Digest MD5))) fp
 
 removeTopic :: Topic -> IO ()
-removeTopic (Topic _ fp) = removeFile fp
+removeTopic (Topic _ fp _) = removeFile fp
 
 createSocket :: IO Socket
 createSocket = do
   socket AF_UNIX Stream defaultProtocol
 
 createSockAddr :: Topic -> IO SockAddr
-createSockAddr t@(Topic _ path) = do
+createSockAddr t@(Topic _ path _) = do
   exists <- doesFileExist path
   if (exists) then removeFile path else return ()
   return $ getSockAddr t
 
 getSockAddr :: Topic -> SockAddr
-getSockAddr (Topic _ path) = SockAddrUnix path
+getSockAddr (Topic _ path _) = SockAddrUnix path

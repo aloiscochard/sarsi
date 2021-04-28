@@ -14,7 +14,7 @@ import System.IO (IOMode (ReadMode), hClose, hWaitForInput)
 import System.IO.Machine (IOSource, byChunkOf, sourceHandle)
 
 consumeOrWait :: Topic -> (Maybe s -> IOSource Event -> IO (Either s a)) -> IO a
-consumeOrWait topic@(Topic (Broker bp) tp) f = do
+consumeOrWait topic@(Topic (Broker bp) tp _) f = do
   res <- consume topic f
   either (const $ withManager waitAndRetry) return res
   where
