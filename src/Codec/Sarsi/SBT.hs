@@ -29,7 +29,7 @@ eventParser :: FilePath -> Parser SBTEvent
 eventParser root = choice [compile, finish, Throw <$> messageParser root]
   where
     compile = do
-      txt <- string "[info] " *> choice ["Build triggered", "Compiling"] *> untilLineBreak <* end
+      txt <- string "[info] " *> choice ["Build triggered", "Compiling", "compiling"] *> untilLineBreak <* end
       return $ CompileStart txt
     finish = do
       res <- status <* space
