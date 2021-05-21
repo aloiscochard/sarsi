@@ -35,6 +35,7 @@ putEvent (Finish es ws) = Put.putInt 1 *> Put.putInt es *> Put.putInt ws
 putEvent (Notify m) = Put.putInt 2 *> putMessage m
 
 data Message = Message Location Level [Text]
+  deriving (Eq)
 
 -- TODO Remove me
 messageTest :: Message
@@ -51,6 +52,7 @@ putMessage :: Message -> Put
 putMessage (Message loc lvl txt) = putLocation loc *> putLevel lvl *> Put.putArray Put.putStr (Vector.fromList txt)
 
 data Location = Location {filePath :: Text, column :: Int, line :: Int}
+  deriving (Eq)
 
 instance Show Location where
   show (Location fp c l) = concat [Text.unpack fp, "@", show l, ":", show c]
@@ -62,7 +64,7 @@ putLocation :: Location -> Put
 putLocation (Location fp c l) = Put.putStr fp *> Put.putInt c *> Put.putInt l
 
 data Level = Warning | Error
-  deriving (Enum, Show)
+  deriving (Eq, Enum, Show)
 
 getLevel :: Get Level
 getLevel = fmap (toEnum . fromIntegral) Get.getInt

@@ -18,7 +18,7 @@ The core of *[sarsi](https://en.wiktionary.org/wiki/sarcio#Latin)* is a simple b
 
 #### Producers
 
- - `srs` - Command line wrapper for build tools (Rust, Haskell)
+ - `srs` - Command line wrapper for build tools (Haskell, Nix, Rust)
  - `sarsi` - Generic utility processing stdin (all supported languages)
  - `sarsi-sbt` - SBT specific wrapper for the Scala programming language
 
@@ -59,7 +59,7 @@ It is specialized for an interactive command and will forward the arguments you 
 
 ### Generic
 
-Languages: Haskell (cabal, stack, ghc), Rust (cargo).
+Languages: Haskell (cabal, stack, ghc), Nix (nix-*), Rust (cargo).
 
 #### srs
 
@@ -76,6 +76,10 @@ It works nicely with [velox](https://github.com/aloiscochard/velox/), [entr](htt
 In some special case you might prefer using the command tool `sarsi` which process stdin and can be used in a pipeline.
 
     cargo build |& sarsi
+
+You can also specific a specific language by using adding its extension when calling `sarsi`.
+
+    cargo build |& sarsi rs
 
 ### Tailored
 
