@@ -3,8 +3,7 @@ module Sarsi.Tools.Trace where
 import qualified Codec.GHC.Log as GHC
 import Codec.Sarsi.Curses (cleanLine, cleaningCurses)
 import qualified Codec.Sarsi.Rust as Rust
-import qualified Codec.Sarsi.SBT as SBT
-import qualified Codec.Sarsi.SBT.Machine as SBTM
+import qualified Codec.Sarsi.Scala as Scala
 import Data.Attoparsec.Text (Parser)
 import Data.Attoparsec.Text.Machine (streamParser)
 import Data.Machine (ProcessT, asParts, auto, autoM, runT_, (<~))
@@ -21,7 +20,7 @@ traceCleanCurses h = runT_ $ autoM printing <~ preprocessing <~ appendLF <~ sour
     printing e = putStrLn $ show e
     preprocessing = streamParser cleaningCurses <~ asParts <~ auto unpackLine <~ asLines
       where
-        asLines = streamParser $ SBT.untilLineBreak <* SBT.end
+        asLines = streamParser $ Scala.untilLineBreak <* Scala.end
     unpackLine (Right txt) = [(cleanLine txt) `Text.snoc` '\n']
     unpackLine (Left _) = []
 
@@ -30,12 +29,6 @@ traceHS = traceParser GHC.messageParser
 
 traceRS :: Handle -> IO ()
 traceRS = traceParser Rust.messageParser
-
-traceSBT :: Handle -> IO ()
-traceSBT = traceParser SBT.eventParser
-
-traceSBTCurses :: Handle -> IO ()
-traceSBTCurses h = runT_ $ printer <~ SBTM.eventProcess' <~ appendLF <~ sourceHandle byLine h
 
 traceParser :: Show a => Parser a -> Handle -> IO ()
 traceParser parser h = do
