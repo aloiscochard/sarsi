@@ -5,6 +5,7 @@ import Codec.Sarsi (Message)
 import Codec.Sarsi.GHC (fromGHCLog)
 import qualified Codec.Sarsi.Nix as Nix
 import qualified Codec.Sarsi.Rust as Rust
+import qualified Codec.Sarsi.Scala as Scala
 import Data.Attoparsec.Text (Parser)
 import Data.Attoparsec.Text.Machine (streamParser)
 import Data.Machine (ProcessT, asParts, auto, flattened, (<~))
@@ -14,8 +15,9 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (Text)
 import Rosetta (LanguageTag (..), ProjectTag, languageTags, projectLanguages)
+import Sarsi (Topic (..))
 
-data Processor = Processor {language :: LanguageTag, process :: ProcessT IO Text Message}
+data Processor = Processor {language :: LanguageTag, process :: Topic -> ProcessT IO Text Message}
 
 instance Eq Processor where
   a == b = (language a) == (language b)
@@ -31,16 +33,17 @@ projectProcessors project = Set.fromList $ g =<< f <$> projectLanguages project
     g (Just (l, p)) = [Processor {language = l, process = p}]
     g Nothing = []
 
-languageProcess :: LanguageTag -> Maybe (ProcessT IO Text Message)
-languageProcess HS = Just processHaskell
-languageProcess NX = Just $ processMessage Nix.messageParser
-languageProcess RS = Just $ processMessage Rust.messageParser
+languageProcess :: LanguageTag -> Maybe (Topic -> ProcessT IO Text Message)
+languageProcess HS = Just $ const processHaskell
+languageProcess NX = Just . const $ processMessage Nix.messageParser
+languageProcess RS = Just . const $ processMessage Rust.messageParser
+languageProcess SC = Just $ \(Topic _ _ root) -> processMessage $ Scala.messageParser root
 languageProcess _ = Nothing
 
-processAll :: [ProcessT IO Text Message] -> ProcessT IO Text Message
-processAll xs = flattened <~ (fanout $ (\p -> (auto (\x -> [x])) <~ p) <$> xs)
+processAll :: [Topic -> ProcessT IO Text Message] -> Topic -> ProcessT IO Text Message
+processAll xs t = flattened <~ (fanout $ (\p -> (auto (\x -> [x])) <~ p t) <$> xs)
 
-processAny :: ProcessT IO Text Message
+processAny :: Topic -> ProcessT IO Text Message
 processAny = processAll $ languageTags >>= (maybeToList . languageProcess)
 
 processHaskell :: ProcessT IO Text Message

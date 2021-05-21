@@ -4,6 +4,7 @@ import Control.Concurrent.Async (async, wait)
 import qualified Data.ByteString as ByteString
 import qualified Data.List as List
 import Data.Machine (Y (Z), auto, autoM, awaits, repeatedly, runT_, wye, yield, (<~))
+import Sarsi (getBroker, getTopic)
 import Sarsi.Processor (processAny)
 import Sarsi.Tools.Pipe (pipeFrom)
 import System.Environment (getArgs)
@@ -23,7 +24,10 @@ main = do
   let sourceErr = sourceHandle byLine dispatchErrRead
   let sourceOut = sourceHandle byLine dispatchOutRead
   let process = processAny
-  worker <- async $ pipeFrom "any" process $ (auto merge) <~ wye sourceErr sourceOut slurp
+  worker <- do
+    b <- getBroker
+    t <- getTopic b "."
+    async $ pipeFrom "any" (process t) $ (auto merge) <~ wye sourceErr sourceOut slurp
   wait conveyorErr
   wait conveyorOut
   wait worker

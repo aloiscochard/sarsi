@@ -9,16 +9,17 @@ import Data.Machine (MachineT, ProcessT, asParts, auto, autoM, prepended, runT_,
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Text.Encoding (decodeUtf8)
-import Sarsi (getBroker, getTopic)
+import Sarsi (Topic, getBroker, getTopic)
 import Sarsi.Producer (produce)
 import System.Exit (ExitCode (ExitSuccess), exitWith)
 import System.IO (stdin, stdout)
 import System.IO.Machine (byLine, sourceHandle)
 
-pipe :: String -> ProcessT IO Text Message -> IO ()
-pipe lbl process =
-  pipeFrom lbl process $
-    autoM echo <~ (sourceHandle byLine stdin)
+pipe :: String -> (Topic -> ProcessT IO Text Message) -> IO ()
+pipe lbl process = do
+  b <- getBroker
+  t <- getTopic b "."
+  pipeFrom lbl (process t) $ autoM echo <~ (sourceHandle byLine stdin)
   where
     echo xs = ByteString.hPutStrLn stdout xs >> return xs
 
