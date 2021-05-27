@@ -19,6 +19,7 @@ library
   exposed-modules:
     Codec.Sarsi
     Codec.Sarsi.Curses
+    Codec.Sarsi.Dotnet
     Codec.Sarsi.GHC
     Codec.Sarsi.Nix
     Codec.Sarsi.Rust
@@ -158,6 +159,7 @@ test-suite tests
     ghc-options:        -Wall
     other-modules:
         Codec.Sarsi.Spec
+        Codec.Sarsi.DotnetSpec
         Codec.Sarsi.NixSpec
         Codec.Sarsi.SBTSpec
 

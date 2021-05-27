@@ -6,7 +6,7 @@ import Data.Version (showVersion)
 import Paths_sarsi (version)
 import qualified Rosetta as Rosetta
 import Sarsi (getBroker, getSockAddr, getTopic, title)
-import Sarsi.Processor (languageProcess, processAll, processAny)
+import Sarsi.Processor (languageProcess, processAll, processAny, projectProcesses)
 import Sarsi.Tools.Pipe (pipe)
 import Sarsi.Tools.Trace (traceCleanCurses, traceHS, traceRS)
 import System.Environment (getArgs)
@@ -30,7 +30,8 @@ main = getArgs >>= run
         pipe (concat $ List.intersperse "+" (Rosetta.languageLabel <$> (Set.toList languageTags))) (processAll $ ps >>= id)
       Left err -> putStrLn $ concat [title, ": ", err]
     fetchProcess lt = case languageProcess lt of
-      Just process -> return [process]
+      Just (Right p) -> return [p]
+      Just (Left projectTag) -> return $ projectProcesses projectTag
       Nothing -> do
         putStrLn $ concat [title, ": ", "unsupported language '", Rosetta.languageLabel lt, "'"]
         return []
