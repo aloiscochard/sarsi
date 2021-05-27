@@ -1,0 +1,25 @@
+[0J> compile[0J
+[0J[0J[2K[1000D[0J[2K[1000D[0J[2K[1000D[0J[2K[1000D[0J[2K[1000D[0J[2K[1000D[0J[2K[1000D[0J[2K[1000D[0J[2K[1000D[0J[2K[1000D[0J[0J[2K[1000D[1000D[0J
+[2K[2K  | => root / update 0s[0J
+[2K[2A[1000D[0J[0J[0m[[0m[0minfo[0m] [0m[0mcompiling 1 Scala source to /home/thomas/dev/explorer-backend/target/scala-2.13/classes ...[0m[0J[0J
+[0J[1000D[0J
+[2K[2K  | => root / update 0s[0J
+[2K[2A[1000D[2K[1000D[2K[1000D[0J[0J[0J[2K[1000D[1000D[0J
+[2K[2K  | => root / Compile / compileIncremental 0s[0J
+[2K[2A[1000D[0J[0J[2K[1000D[1000D[0J
+[2K[2K  | => root / Compile / compileIncremental 0s[0J
+[2K[2A[1000D[0J[0J[0m[[0m[31merror[0m] [0m[0m/home/thomas/dev/explorer-backend/src/main/scala/org/alephium/explorer/web/TransactionServer.scala:27:1: expected class or object definition[0m[0J[0J
+[0J[1000D[0J
+[2K[2K  | => root / Compile / compileIncremental 0s[0J
+[2K[2A[1000D[2K[1000D[0m[[0m[31merror[0m] [0m[0mlass TransactionServer(transactionService: TransactionService)([0m[0J[0J
+[0J[1000D[0J
+[2K[2K  | => root / Compile / compileIncremental 0s[0J
+[2K[2A[1000D[2K[1000D[0m[[0m[31merror[0m] [0m[0m^[0m[0J[0J
+[0J[1000D[0J
+[2K[2K  | => root / Compile / compileIncremental 0s[0J
+[2K[2A[1000D[2K[1000D[0m[[0m[31merror[0m] [0m[0mone error found[0m[0J[0J
+[0J[1000D[0J
+[2K[2K  | => root / Compile / compileIncremental 0s[0J
+[2K[2A[1000D[2K[1000D[0J[0J[2K[1000D[0J[0J[0m[[0m[31merror[0m] [0m[0m(Compile / [31mcompileIncremental[0m) Compilation failed[0m[0J[0J
+[0J[2K[1000D[0J[0J[[31merror[0m] Total time: 3 s, completed May 23, 2021, 9:04:09 PM[0J
+[0J[0J[91msarsi[0m: build failure with 1 error(s)

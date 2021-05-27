@@ -2,14 +2,12 @@
 
 module Codec.Sarsi.SBT where
 
-import Codec.Sarsi (Level (..), Location (..), Message (..))
+import Codec.Sarsi (Message (..))
 import Codec.Sarsi.Scala
-import Data.Attoparsec.Combinator (lookAhead)
 import Data.Attoparsec.Text
 import qualified Data.Attoparsec.Text as AttoText
 import Data.Text (Text)
 import qualified Data.Text as Text
-import System.FilePath (makeRelative)
 
 data SBTEvent = CompileStart Text | TaskFinish Bool Text | Throw Message
   deriving (Show)

@@ -5,6 +5,7 @@ import Codec.Sarsi (Message)
 import Codec.Sarsi.GHC (fromGHCLog)
 import qualified Codec.Sarsi.Nix as Nix
 import qualified Codec.Sarsi.Rust as Rust
+import qualified Codec.Sarsi.SBT.Machine as SBT
 import qualified Codec.Sarsi.Scala as Scala
 import Data.Attoparsec.Text (Parser)
 import Data.Attoparsec.Text.Machine (streamParser)
@@ -37,7 +38,7 @@ languageProcess :: LanguageTag -> Maybe (Topic -> ProcessT IO Text Message)
 languageProcess HS = Just $ const processHaskell
 languageProcess NX = Just . const $ processMessage Nix.messageParser
 languageProcess RS = Just . const $ processMessage Rust.messageParser
-languageProcess SC = Just $ \(Topic _ _ root) -> processMessage $ Scala.messageParser root
+languageProcess SC = Just $ \(Topic _ _ root) -> (processMessage $ Scala.messageParser root) <~ SBT.cleaningCursesSBT
 languageProcess _ = Nothing
 
 processAll :: [Topic -> ProcessT IO Text Message] -> Topic -> ProcessT IO Text Message

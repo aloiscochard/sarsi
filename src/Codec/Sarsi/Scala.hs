@@ -5,7 +5,6 @@ module Codec.Sarsi.Scala where
 import Codec.Sarsi (Level (..), Location (..), Message (..))
 import Data.Attoparsec.Combinator (lookAhead)
 import Data.Attoparsec.Text
-import qualified Data.Attoparsec.Text as AttoText
 import Data.Text (Text)
 import qualified Data.Text as Text
 import System.FilePath (makeRelative)

@@ -2,12 +2,18 @@ module Codec.Sarsi.SBT.Machine where
 
 import Codec.Sarsi (Event (..), Level (..), Message (..))
 import Codec.Sarsi.Curses (cleaningCurses)
-import Codec.Sarsi.SBT (SBTEvent (..), cleaningCursesSBT, eventParser)
+import Codec.Sarsi.SBT (SBTEvent (..), eventParser)
+import qualified Codec.Sarsi.SBT as SBT
+import Data.Attoparsec.Text (Parser)
 import Data.Attoparsec.Text.Machine (asLines, processParser, streamParser)
 import Data.Machine (ProcessT, asParts, auto, filtered, scan, (<~))
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Sarsi (Topic (..))
+
+-- We run two passes to remove remaining line breaks after removing interactive informations.
+cleaningCursesSBT :: Monad m => ProcessT m Text Text
+cleaningCursesSBT = parsing SBT.cleaningCursesSBT <~ parsing SBT.cleaningCursesSBT
 
 eventProcess :: Monad m => Topic -> ProcessT m Text Event
 eventProcess t = asParts <~ auto unpack <~ (scan f (emptySession, Nothing)) <~ eventProcess' t
@@ -19,13 +25,9 @@ eventProcess t = asParts <~ auto unpack <~ (scan f (emptySession, Nothing)) <~ e
 eventProcess' :: Monad m => Topic -> ProcessT m Text SBTEvent
 eventProcess' (Topic _ _ root) = asParts <~ auto unpackEvent <~ streamParser (eventParser root) <~ preprocessing
   where
-    preprocessing = filtered (not . Text.null) <~ parsing cleaningCursesSBT <~ parsing cleaningCurses <~ input
+    preprocessing = filtered (not . Text.null) <~ cleaningCursesSBT <~ parsing cleaningCurses <~ input
       where
         input = auto (\txt -> Text.snoc txt '\n') <~ asLines
-        parsing p = asParts <~ auto f <~ processParser p
-          where
-            f (Left _) = []
-            f (Right (_, txt)) = [txt]
     unpackEvent (Right e) = [e]
     unpackEvent (Left _) = []
 
@@ -44,3 +46,9 @@ runSession (Session True f) (Throw msg@(Message _ lvl _)) = (Session True (inc l
   where
     inc Warning (e, w) = (e, w + 1)
     inc Error (e, w) = (e + 1, w)
+
+parsing :: Monad m => Parser a -> ProcessT m Text a
+parsing p = asParts <~ auto f <~ processParser p
+  where
+    f (Left _) = []
+    f (Right (_, txt)) = [txt]

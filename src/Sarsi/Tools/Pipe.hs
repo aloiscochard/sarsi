@@ -35,7 +35,9 @@ producer lbl process source sink = do
   runT_ $ pipeline <~ process <~ cleaning <~ auto decodeUtf8 <~ source
   where
     pipeline = sink <~ prepended [Start $ Text.pack lbl] <~ auto Notify
-    cleaning = asParts <~ auto unpack <~ processParser cleaningCurses <~ auto (\txt -> (cleanLine txt) `Text.snoc` '\n')
-      where
-        unpack (Right (_, txt)) = [txt]
-        unpack (Left _) = []
+
+cleaning :: ProcessT IO Text Text
+cleaning = asParts <~ auto unpack <~ processParser cleaningCurses <~ auto (\txt -> (cleanLine txt) `Text.snoc` '\n')
+  where
+    unpack (Right (_, txt)) = [txt]
+    unpack (Left _) = []

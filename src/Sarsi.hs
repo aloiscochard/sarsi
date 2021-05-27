@@ -17,9 +17,9 @@ data Topic = Topic {broker :: Broker, topicPath :: FilePath, topicOrigin :: File
 getBroker :: IO Broker
 getBroker = do
   bp <- getXdgDirectory XdgCache title
-  let broker = Broker bp
+  let b = Broker bp
   exists <- doesDirectoryExist bp
-  if exists then return broker else createDirectory bp >> return broker
+  if exists then return b else createDirectory bp >> return b
 
 getTopic :: Broker -> FilePath -> IO Topic
 getTopic b@(Broker bp) fp' = do
