@@ -15,6 +15,6 @@ spec :: Spec
 spec = it "should work" $ do
   let processor = (streamParser $ Scala.messageParser "/home/thomas/dev/explorer-backend/" {-- <~ (auto traceShowId) --}) <~ SBT.cleaningCursesSBT <~ cleaning
   xs <- parsingFile processor "tests/sbt-error.txt"
-  _ <- traverse (putStrLn . show) xs
+  -- _ <- traverse (putStrLn . show) xs
   let msg = Message (Location "src/main/scala/org/alephium/explorer/web/TransactionServer.scala" 1 27) Error ["expected class or object definition"]
   shouldBe (head $ tail $ tail xs) (Right $ msg)
