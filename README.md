@@ -18,7 +18,7 @@ The core of *[sarsi](https://en.wiktionary.org/wiki/sarcio#Latin)* is a simple b
 
 #### Producers
 
- - `srs` - Command line wrapper for build tools (Haskell, Nix, Rust, Scala)
+ - `srs` - Command line wrapper for build tools (Dotnet, Haskell, Nix, Rust, Scala)
  - `sarsi` - Generic utility processing stdin (all supported languages)
  - `sarsi-sbt` - SBT specific wrapper for the Scala programming language (if sbt version >= 1.14 prefer the generic utilities for `scala`)
 
@@ -59,7 +59,7 @@ It is specialized for an interactive command and will forward the arguments you 
 
 ### Generic
 
-Languages: Haskell (cabal, stack, ghc), Nix (nix-*), Rust (cargo), Scala (sbt >= 1.14).
+Languages: Dotnet family (dotnet, msbuild), Haskell (cabal, stack, ghc), Nix (nix-*), Rust (cargo), Scala (sbt >= 1.14).
 
 #### srs
 
