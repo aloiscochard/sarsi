@@ -20,7 +20,6 @@ The core of *[sarsi](https://en.wiktionary.org/wiki/sarcio#Latin)* is a simple b
 
  - `srs` - Command line wrapper for build tools (Haskell, Nix, Rust, Scala)
  - `sarsi` - Generic utility processing stdin (all supported languages)
- - `sarsi-sbt` - SBT specific wrapper for the Scala programming language (if sbt version >= 1.14 prefer the generic utilities for `scala`)
 
 #### Consumers
 
@@ -51,17 +50,11 @@ It means you have to start consumers/producers from the same directory for them 
 
 ## Producers
 
-*Generic*
 It does allow you to run an arbitrary command and get it's output transparently feeded into all active consumers.
-
-*Tailored*
-It is specialized for an interactive command and will forward the arguments you pass to that specific program.
-
-### Generic
 
 Languages: Haskell (cabal, stack, ghc), Nix (nix-*), Rust (cargo), Scala (sbt >= 1.14).
 
-#### srs
+### srs
 
 The `srs` command line wrapper is *generic* and can be used with any build tool.
 
@@ -71,7 +64,7 @@ It works nicely with [velox](https://github.com/aloiscochard/velox/), [entr](htt
 
     vlx srs cargo build
 
-#### sarsi
+### sarsi
 
 In some special case you might prefer using the command tool `sarsi` which process stdin and can be used in a pipeline.
 
@@ -80,18 +73,6 @@ In some special case you might prefer using the command tool `sarsi` which proce
 You can also specific a specific language by using adding its extension when calling `sarsi`.
 
     cargo build |& sarsi rs
-
-### Tailored
-
-Languages: Scala (sbt).
-
-#### Scala (SBT)
-
-You can use this *tailored* wrapper in place of your `sbt` command, interactively or not (you should surely prefer the former for performance reasons).
-
-    sarsi-sbt
-
-It will behind the scene call the `sbt` program available in the path and transparently forward the quick fixes produced to the available consumers.
 
 ## Consumers
 

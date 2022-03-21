@@ -105,21 +105,6 @@ executable sarsi-nvim
   ghc-options:          -Wall -dynamic -threaded
   default-language:     Haskell2010
 
-executable sarsi-sbt
-  main-is:              Main.hs
-  other-modules:
-  build-depends:
-      base
-    , sarsi
-    , machines
-    , machines-io
-    , machines-process
-    , process
-    , text
-  hs-source-dirs:       sarsi-sbt
-  ghc-options:          -Wall -dynamic -threaded
-  default-language:     Haskell2010
-
 executable sarsi-vi
   main-is:              Main.hs
   build-depends:
