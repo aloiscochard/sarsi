@@ -52,7 +52,7 @@ It means you have to start consumers/producers from the same directory for them 
 
 It does allow you to run an arbitrary command and get it's output transparently feeded into all active consumers.
 
-Languages: Haskell (cabal, stack, ghc), Nix (nix-*), Rust (cargo), Scala (sbt >= 1.14).
+Languages: C/C++ (gcc), Haskell (cabal, stack, ghc), Nix (nix-*), Rust (cargo), Scala (sbt >= 1.14).
 
 ### srs
 

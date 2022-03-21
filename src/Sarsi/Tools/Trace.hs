@@ -2,6 +2,7 @@ module Sarsi.Tools.Trace where
 
 import qualified Codec.GHC.Log as GHC
 import Codec.Sarsi.Curses (cleanLine, cleaningCurses)
+import qualified Codec.Sarsi.GCC as GCC
 import qualified Codec.Sarsi.Rust as Rust
 import qualified Codec.Sarsi.Scala as Scala
 import Data.Attoparsec.Text (Parser)
@@ -23,6 +24,9 @@ traceCleanCurses h = runT_ $ autoM printing <~ preprocessing <~ appendLF <~ sour
         asLines = streamParser $ Scala.untilLineBreak <* Scala.end
     unpackLine (Right txt) = [(cleanLine txt) `Text.snoc` '\n']
     unpackLine (Left _) = []
+
+traceGCC :: Handle -> IO ()
+traceGCC = traceParser GCC.messageParser
 
 traceHS :: Handle -> IO ()
 traceHS = traceParser GHC.messageParser

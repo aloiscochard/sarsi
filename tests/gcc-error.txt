@@ -1,0 +1,4 @@
+/tmp/helloworld/hello/hello.c:3:1: error: unknown type name ‘oint’; did you mean ‘int’?
+    3 | oint main() {
+      | ^~~~
+      | int

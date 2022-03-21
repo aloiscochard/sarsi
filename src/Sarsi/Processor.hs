@@ -2,6 +2,8 @@ module Sarsi.Processor where
 
 import qualified Codec.GHC.Log as GHC
 import Codec.Sarsi (Message)
+import qualified Codec.Sarsi.Curses as Curses
+import qualified Codec.Sarsi.GCC as GCC
 import Codec.Sarsi.GHC (fromGHCLog)
 import qualified Codec.Sarsi.Nix as Nix
 import qualified Codec.Sarsi.Rust as Rust
@@ -27,7 +29,6 @@ instance Ord Processor where
   compare a b = compare (language a) (language b)
 
 projectProcessors :: ProjectTag -> Set Processor
--- projectProcessors DOTNET = processDotnet
 projectProcessors project = Set.fromList $ g =<< f <$> projectLanguages project
   where
     f l = (\p -> (l, p)) <$> languageProcess l
@@ -35,6 +36,7 @@ projectProcessors project = Set.fromList $ g =<< f <$> projectLanguages project
     g Nothing = []
 
 languageProcess :: LanguageTag -> Maybe (Topic -> ProcessT IO Text Message)
+languageProcess CC = Just . const $ processMessage $ GCC.messageParser
 languageProcess HS = Just $ const processHaskell
 languageProcess NX = Just . const $ processMessage Nix.messageParser
 languageProcess RS = Just . const $ processMessage Rust.messageParser
